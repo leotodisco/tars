@@ -45,7 +45,6 @@ class MyCustomChatModel extends SimpleChatModel {
       };
     });
     const client = await loadHuggingFace();
-    console.log("new  messages = ", newMessages);
     let chatCompletion;
     try {
       chatCompletion = await client.chatCompletion({

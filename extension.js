@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const { agent } = require("./src/agent/agent");
+const { logger } = require("./src/utils/logger")
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -12,7 +13,7 @@ function activate(context) {
 		}
 		let text = document?.getText();
 		if (!text) {
-			console.log("text is undefined");
+			logger.error("text is undefined");
 			return;
 		}
 

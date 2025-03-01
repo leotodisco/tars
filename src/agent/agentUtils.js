@@ -27,8 +27,32 @@ function doubleBraces(input) {
     return input.replace(/[\{\}]/g, match => match + match);
 }
 
+/**
+ * This function removes unnecessary tokens from the LLM Answers
+ * @param {string} LLMAnswer
+ */
+function cleanLLMAnswer(LLMAnswer, programmingLanguage = "") {
+    // Deepseek-specific cleaning
+    let responseString = LLMAnswer.split("</think>\n").pop();
+    
+    // check if this starts with ```json or ```language
+    if (responseString.startsWith('\`\`\`json')) {
+        responseString = responseString.toString().split("```json").pop();
+        responseString = responseString.toString().split("```")[0];
+    }
+
+    if (responseString.startsWith(`\`\`\`${programmingLanguage}`)) {
+        responseString = responseString.toString().split(`\`\`\`${programmingLanguage}`).pop();
+        responseString = responseString.toString().split("```")[0];
+    }
+
+    return responseString
+
+}
+
 module.exports = {
     PLANNING_SYSTEM_PROMPT,
     CRITIQUE_SYSTEM_PROMPT,
-    doubleBraces
+    doubleBraces,
+    cleanLLMAnswer
 }

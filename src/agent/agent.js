@@ -4,16 +4,12 @@ const { ChatPromptTemplate } = require("@langchain/core/prompts");
 const { Ollama } = require("@langchain/ollama");
 const { MyCustomChatModel } = require("./myCustomChatModel");
 const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils.js");
-const { doubleBraces } = require("./agentUtils.js")
+const { doubleBraces, cleanLLMAnswer } = require("./agentUtils.js")
 const { agentState } = require("./agentState.js")
-
-const flagPrint = false
+const { logger } = require("../utils/logger.js")
 
 async function planner(state) {
-    if (flagPrint) {
-        console.log("---GENERATE---");
-        console.log(state);
-    }    
+    logger.info("agent", "Planning node...");
 
     // if using a reasoning model -> RESPONSE.split("</think>\n").pop();
     const llm = new MyCustomChatModel({ model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" });
@@ -36,17 +32,13 @@ async function planner(state) {
     ]);
 
     const chain = prompt.pipe(llm);
-    //let response = await chain.invoke({}); check if {} is useless
     let response = await chain.invoke();
-    let responseString = response.content.toString().split("</think>\n").pop();
 
-    if (flagPrint) {
-        console.log(response.content.toString());
-    }
-
-    // let responseString = response.toString().split("```json").pop();
-    // responseString = response.toString().split("```")[0];
+    let responseString = response.content.toString()
+    responseString = cleanLLMAnswer(responseString)
+    logger.info("agent", response.content.toString());
     if (!responseString) {
+        logger.error("agent", "planning node failed to give answer")
         return { inputCode: state["inputCode"] };
     }
 
@@ -54,13 +46,9 @@ async function planner(state) {
 }
 
 async function critiqueNode(state) {
-    if (flagPrint) {
-        console.log("---CRITIQUE NODE---");
-        console.log(state);
-    }
+    logger.info("agent", `Critique node...`);
 
     const llm = new MyCustomChatModel({ model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" });
-
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",
@@ -74,21 +62,21 @@ async function critiqueNode(state) {
 
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
-    //console.log(response.content.toString());
-    let responseString = response.content.toString().split("</think>\n\n").pop(); // todo sostituire questi \n con effettivi controlli che ignorino gli spazi 
-    if (!responseString) {
+
+    let critiqueResponseString = response.content.toString()
+    critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
+    logger.info("agent", response.content.toString());
+    if (!critiqueResponseString) {
+        logger.error("agent", "critique node failed to give answer")
         return { inputCode: state["inputCode"] };
     }
 
-    if (flagPrint) {
-        console.log("RISPOSTA CRITICA = ", responseString)
-    }
-
-    return { critique: responseString };
+    logger.info("agent", `Critique Response: ${critiqueResponseString}`)
+    return { critique: critiqueResponseString };
 }
 
 async function isCritiqueOK(state) {
-    if (state["critique"] === "OK") {
+    if (state["critique"] === "OK" || state["critique"] === "\nOK") { // sistemare questa cosa
         return END;
     }
     else
