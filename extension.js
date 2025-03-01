@@ -1,34 +1,66 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 const vscode = require('vscode');
-
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const { agent } = require("./src/agent/agent");
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "tars" is now active!');
+	const explainCodeCommand = vscode.commands.registerCommand('tars.explain-code', async () => {
+		const document = vscode.window.activeTextEditor?.document;
+		if (document === undefined) {
+			return;
+		}
+		let text = document?.getText();
+		if (!text) {
+			console.log("text is undefined");
+			return;
+		}
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('tars.helloWorld', function () {
-		// The code you place here will be executed every time your command is executed
+		// Invoco agent
+		const app = agent.compile();
+		let risposta = await app.invoke({
+			inputCode: text
+		});
+		// stampo in editor le varie cose
+		let resultString = "";
+		let newRisposta = risposta["outputStructure"]; //lista di JSON
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from TARS!');
+		if (Array.isArray(newRisposta)) {
+			for (const dictionary of newRisposta) {
+				{
+
+					resultString = resultString.concat(`\n"""\n`);
+					resultString = resultString.concat(dictionary["description"]);
+					resultString = resultString.concat(`\n"""\n`);
+					resultString = resultString.concat(dictionary["text"]);
+
+				}
+			}
+		}
+
+		const editor = vscode.window.activeTextEditor;
+		if (editor === undefined) {
+			return;
+		}
+		const start = new vscode.Position(0, 0);
+		const end = new vscode.Position(
+			document.lineCount - 1,
+			document.lineAt(document.lineCount - 1).text.length
+		);
+		const fullRange = new vscode.Range(start, end);
+
+		editor.edit(editBuilder => {
+			editBuilder.replace(fullRange, resultString);
+		});
+
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(explainCodeCommand);
 }
 
 // This method is called when your extension is deactivated
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
 	activate,
