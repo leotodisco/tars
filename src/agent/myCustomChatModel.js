@@ -1,8 +1,17 @@
 const { SimpleChatModel } = require("@langchain/core/language_models/chat_models");
+const path = require("path");
+const dotenv = require("dotenv");
+const vscode = require("vscode");
+
+const extensionPath = vscode.extensions.all.find(ext => ext.packageJSON.name === "tars").extensionPath;
+const envPath = path.join(extensionPath, "src/agent/.env");
+dotenv.config({ path: envPath });
 
 async function loadHuggingFace() {
   const { HfInference } = await import("@huggingface/inference");
-  return new HfInference("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");
+  const hf_token = process.env.HF_TOKEN
+  
+  return new HfInference(hf_token);
 }
 
   class MyCustomChatModelInput {

@@ -1,5 +1,6 @@
 {
   "name": "tars",
+  "publisher": "leopoldo",
   "displayName": "TARS",
   "description": "",
   "version": "0.0.1",
@@ -35,6 +36,7 @@
   "dependencies": {
     "@huggingface/inference": "^3.4.1",
     "@langchain/langgraph": "^0.2.51",
-    "@langchain/ollama": "^0.2.0"
+    "@langchain/ollama": "^0.2.0",
+    "dotenv": "^16.4.7"
   }
 }
