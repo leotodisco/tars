@@ -5,7 +5,6 @@ const { agent } = require("./src/agent/agent");
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-	console.log('Congratulations, your extension "tars" is now active!');
 	const explainCodeCommand = vscode.commands.registerCommand('tars.explain-code', async () => {
 		const document = vscode.window.activeTextEditor?.document;
 		if (document === undefined) {
@@ -18,8 +17,8 @@ function activate(context) {
 		}
 
 		// Invoco agent
-		const app = agent.compile();
-		let risposta = await app.invoke({
+		const agentInstance = agent.compile();
+		let risposta = await agentInstance.invoke({
 			inputCode: text
 		});
 		// stampo in editor le varie cose
