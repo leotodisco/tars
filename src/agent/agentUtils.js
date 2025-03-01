@@ -10,10 +10,25 @@ In the description when you end a sentence, you must add the escape \n
     •	The code must be divided into multiple clusters, not just a single one. Generate as many clusters as possible.
     •	Do not change the order of the code. The clusters must be extracted while preserving the original sequence in which the code was written.
     •	Do not include any introductory text or explanations—only return the structured list.
-    •	Do not include \`\`\`json or any useless text, I must parse your output with a formatter so don't add useless text.
-`;
+    •	Do not include \`\`\`json or any useless text, I must parse your output with a formatter so don't add useless text.`;
 
+const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
+{{
+    "text": "code snippet in a string format",
+    "description": "description (max 3 lines of text in which there is a description in natural language what the code does)"
+}}
+
+Your task is to verify that the description is actually Correct.
+If it is not correct you must respond with "NOT OK" and provide a suggestion.
+If the description is correct you must respond **ONLY** with "OK".
+Do not add any introductive text.`;
+
+function doubleBraces(input) {
+    return input.replace(/[\{\}]/g, match => match + match);
+}
 
 module.exports = {
-    PLANNING_SYSTEM_PROMPT
+    PLANNING_SYSTEM_PROMPT,
+    CRITIQUE_SYSTEM_PROMPT,
+    doubleBraces
 }
