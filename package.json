@@ -37,6 +37,7 @@
     "@huggingface/inference": "^3.4.1",
     "@langchain/langgraph": "^0.2.51",
     "@langchain/ollama": "^0.2.0",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "tslab": "^1.0.22"
   }
 }

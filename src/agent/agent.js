@@ -33,9 +33,9 @@ async function planner(state) {
 
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
-
     let responseString = response.content.toString()
     responseString = cleanLLMAnswer(responseString)
+    
     logger.info("agent", response.content.toString());
     if (!responseString) {
         logger.error("agent", "planning node failed to give answer")
@@ -84,11 +84,11 @@ async function isCritiqueOK(state) {
 }
 
 const agent = new StateGraph(agentState)
-    .addNode("plannerNode", planner)
-    .addNode("critiqueNode", critiqueNode);
+    .addNode("plannerNode", planner);
+    //.addNode("critiqueNode", critiqueNode);
 
-agent.addEdge(START, "plannerNode")
-    .addEdge("plannerNode", "critiqueNode")
-    .addConditionalEdges("critiqueNode", isCritiqueOK);
+agent.addEdge(START, "plannerNode").addEdge("plannerNode", END);
+    //.addEdge("plannerNode", "critiqueNode")
+    //.addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };

@@ -36,7 +36,7 @@ function cleanLLMAnswer(LLMAnswer, programmingLanguage = "") {
     let responseString = LLMAnswer.split("</think>\n").pop();
     
     // check if this starts with ```json or ```language
-    if (responseString.startsWith('\`\`\`json')) {
+    if (responseString.startsWith('\`\`\`json') || responseString.startsWith(' \`\`\`json') || responseString.startsWith('\n\`\`\`json')) {
         responseString = responseString.toString().split("```json").pop();
         responseString = responseString.toString().split("```")[0];
     }
@@ -47,7 +47,6 @@ function cleanLLMAnswer(LLMAnswer, programmingLanguage = "") {
     }
 
     return responseString
-
 }
 
 module.exports = {
