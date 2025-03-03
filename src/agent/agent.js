@@ -10,9 +10,6 @@ const { agentState } = require("./agentState.js")
 
 
 async function planner(state) {
-    //logger.info("agent", "Planning node...");
-
-    // if using a reasoning model -> RESPONSE.split("</think>\n").pop();
     const llm = new MyCustomChatModel({ model: state["modelName"] });
 
     // modularità se vuoi runnare in locale o in cloud
@@ -36,10 +33,9 @@ async function planner(state) {
     let response = await chain.invoke();
     let responseString = response.content.toString()
     responseString = cleanLLMAnswer(responseString)
-    
-    
+
+
     if (!responseString) {
-        
         return { inputCode: state["inputCode"] };
     }
 
@@ -66,13 +62,13 @@ async function critiqueNode(state) {
 
     let critiqueResponseString = response.content.toString()
     critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
-    
+
     if (!critiqueResponseString) {
-        
+
         return { inputCode: state["inputCode"] };
     }
 
-    
+
     return { critique: critiqueResponseString };
 }
 

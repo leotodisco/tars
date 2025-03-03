@@ -1,6 +1,5 @@
 const vscode = require('vscode');
 const { agent } = require("./src/agent/agent");
-//const { logger } = require("./src/utils/logger")
 const fs = require('fs'); // Use this to print image later
 const { findConstructs } = require("./src/utils/constructsRetriever")
 const { findMatches } = require("./src/utils/stringUtils")
@@ -35,7 +34,7 @@ function activate(context) {
 				const startIndex = document.getText().indexOf(construct.sourceCode);
 				const endIndex = startIndex + construct.sourceCode.length;
 				const startPosition = document.positionAt(startIndex);
-                const endPosition = document.positionAt(endIndex);
+				const endPosition = document.positionAt(endIndex);
 				vscode.window.showWarningMessage(
 					`${construct.name}, Start Line: ${startPosition.line}, End Line: ${endPosition.line}`
 				);
@@ -54,8 +53,7 @@ function activate(context) {
 
 				for (const element of outputList) {
 					//findMatches(document.getText(construct.range), element["text"])  TODO ALGORITMO DI RICERCA CUSTOM
-					
-					if (document.getText(construct.range).includes(element["text"])) { 
+					if (document.getText(construct.range).includes(element["text"])) {
 						const startIndex = document.getText().indexOf(element["text"]);
 						const endIndex = startIndex + element["text"].length;
 						const startPosition = document.positionAt(startIndex);
@@ -112,18 +110,18 @@ function activate(context) {
 							// Creiamo una decorazione per ogni riga
 							const decorationType = vscode.window.createTextEditorDecorationType({
 								backgroundColor: "transparent", // Sfondo rosso trasparente su tutte le righe
-								isWholeLine: true,
+								isWholeLine: false,
+								//isWholeLine: true, doing so the line will be entirely covered
 								after: {
-									contentText: `| ${text}`, // Se il testo è vuoto, lascia spazio per mantenere l'allineamento
+									contentText: `  ${text}`, // Se il testo è vuoto, lascia spazio per mantenere l'allineamento
 									color: "white",
-									fontWeight: "bold",
-									backgroundColor: "rgba(0, 0, 0, 0.7)", // Box scuro
-									//border: "0px 0px 1px 0px solid gray",
+									fontWeight: "1200",
+									//backgroundColor: "transparent",
 								},
-								borderWidth: '2px 2px 0 2px',
+								borderWidth: '0px 0px 0 2px',
 								borderStyle: 'solid',
-								borderSpacing: '2px',
-								borderColor: '#f00',
+								borderSpacing: '10px',
+								borderColor: "rgba(132, 205, 225, 0.92)",
 
 
 							});
@@ -147,7 +145,6 @@ function activate(context) {
 
 					else {
 						console.log("\n\n no match here")
-						console.log("\n\n\n\n\n")
 						console.log(element["text"])
 						vscode.window.showWarningMessage(
 							`Non trovato match per: ${element["text"]}`
@@ -160,39 +157,9 @@ function activate(context) {
 		}
 		else {
 			return;
-			// TO DO GESTIRE MANDANDO INTETO TESTO
+			// TO DO GESTIRE MANDANDO INTERO TESTO
 		}
 		return;
-		// stampo in editor le varie cose
-		let resultString = "";
-		let newRisposta = risposta["outputStructure"]; //lista di JSON
-
-
-		if (Array.isArray(newRisposta)) {
-			for (const dictionary of newRisposta) {
-				{
-					resultString = resultString.concat(`\n"""\n`);
-					resultString = resultString.concat(dictionary["description"]);
-					resultString = resultString.concat(`\n"""\n`);
-					resultString = resultString.concat(dictionary["text"]);
-				}
-			}
-		}
-
-		if (editor === undefined) {
-			return;
-		}
-		const start = new vscode.Position(0, 0);
-		const end = new vscode.Position(
-			document.lineCount - 1,
-			document.lineAt(document.lineCount - 1).text.length
-		);
-		const fullRange = new vscode.Range(start, end);
-
-		editor.edit(editBuilder => {
-			editBuilder.replace(fullRange, resultString);
-		});
-
 	});
 
 	context.subscriptions.push(explainCodeCommand);
