@@ -4,6 +4,10 @@ return a list of dictionaries, where the list follows this structure:
     "text": "code snippet in a string format",
     "description": "description (max 3 lines of text in which you describe in natural language what the cluster of code does)"
 }}
+
+You should avoid writing obvious descriptions, such as "function declaration".
+NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.
+
 In the description when you end a sentence, you must add the escape \n
     •	A cluster can be a multi-line block of code or a single line of code if it has a distinct function or purpose.
     •	Examples of clusters are: if body, functions, else body, classes, for loops body... 

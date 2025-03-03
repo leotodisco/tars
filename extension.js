@@ -47,6 +47,9 @@ function activate(context) {
 				} else if (outputStructure !== null && outputStructure !== undefined) {
 					outputList = [outputStructure]; // Se è un singolo valore, lo trasformiamo in array
 				}
+				console.log("\n\n\n\n\n")
+				console.log(document.getText())
+				console.log("\n\n\n\n\n")
 
 				for (const element of outputList) {
 					if (document.getText().includes(element["text"])) {
@@ -106,15 +109,21 @@ function activate(context) {
 
 							// Creiamo una decorazione per ogni riga
 							const decorationType = vscode.window.createTextEditorDecorationType({
-								backgroundColor: "rgba(255, 0, 0, 0.2)", // Sfondo rosso trasparente su tutte le righe
+								backgroundColor: "transparent", // Sfondo rosso trasparente su tutte le righe
 								isWholeLine: true,
 								after: {
 									contentText: `| ${text}`, // Se il testo è vuoto, lascia spazio per mantenere l'allineamento
 									color: "white",
 									fontWeight: "bold",
 									backgroundColor: "rgba(0, 0, 0, 0.7)", // Box scuro
-									border: "0px 0px 1px 0px solid gray",
+									//border: "0px 0px 1px 0px solid gray",
 								},
+								borderWidth: '2px 2px 0 2px',
+								borderStyle: 'solid', 
+								borderSpacing: '2px',
+								borderColor: '#f00',
+						
+								
 							});
 
 							// Creiamo il range sulla riga corrispondente
@@ -132,6 +141,15 @@ function activate(context) {
 						});
 
 
+					}
+
+					else {
+						console.log("\n\n no match here")
+						console.log("\n\n\n\n\n")
+						console.log(element["text"])
+						vscode.window.showWarningMessage(
+							`Non trovato match per: ${element["text"]}`
+						);
 					}
 				}
 
