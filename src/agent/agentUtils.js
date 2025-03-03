@@ -6,7 +6,7 @@ return a list of dictionaries, where the list follows this structure:
 }}
 
 You should avoid writing obvious descriptions, such as "function declaration".
-NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.
+**NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.**
 
 In the description when you end a sentence, you must add the escape \n
     •	A cluster can be a multi-line block of code or a single line of code if it has a distinct function or purpose.
@@ -59,3 +59,4 @@ module.exports = {
     doubleBraces,
     cleanLLMAnswer
 }
+

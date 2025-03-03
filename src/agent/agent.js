@@ -6,13 +6,14 @@ const { MyCustomChatModel } = require("./myCustomChatModel");
 const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils.js");
 const { doubleBraces, cleanLLMAnswer } = require("./agentUtils.js")
 const { agentState } = require("./agentState.js")
-const { logger } = require("../utils/logger.js")
+
+
 
 async function planner(state) {
-    logger.info("agent", "Planning node...");
+    //logger.info("agent", "Planning node...");
 
     // if using a reasoning model -> RESPONSE.split("</think>\n").pop();
-    const llm = new MyCustomChatModel({ model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" });
+    const llm = new MyCustomChatModel({ model: state["modelName"] });
 
     // modularità se vuoi runnare in locale o in cloud
     // const llm = new Ollama({
@@ -36,9 +37,9 @@ async function planner(state) {
     let responseString = response.content.toString()
     responseString = cleanLLMAnswer(responseString)
     
-    logger.info("agent", response.content.toString());
+    
     if (!responseString) {
-        logger.error("agent", "planning node failed to give answer")
+        
         return { inputCode: state["inputCode"] };
     }
 
@@ -46,9 +47,9 @@ async function planner(state) {
 }
 
 async function critiqueNode(state) {
-    logger.info("agent", `Critique node...`);
 
-    const llm = new MyCustomChatModel({ model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" });
+
+    const llm = new MyCustomChatModel({ model: state["modelName"] });
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",
@@ -65,13 +66,13 @@ async function critiqueNode(state) {
 
     let critiqueResponseString = response.content.toString()
     critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
-    logger.info("agent", response.content.toString());
+    
     if (!critiqueResponseString) {
-        logger.error("agent", "critique node failed to give answer")
+        
         return { inputCode: state["inputCode"] };
     }
 
-    logger.info("agent", `Critique Response: ${critiqueResponseString}`)
+    
     return { critique: critiqueResponseString };
 }
 
@@ -84,11 +85,11 @@ async function isCritiqueOK(state) {
 }
 
 const agent = new StateGraph(agentState)
-    .addNode("plannerNode", planner);
-    //.addNode("critiqueNode", critiqueNode);
+    .addNode("plannerNode", planner)
+    .addNode("critiqueNode", critiqueNode);
 
-agent.addEdge(START, "plannerNode").addEdge("plannerNode", END);
-    //.addEdge("plannerNode", "critiqueNode")
-    //.addConditionalEdges("critiqueNode", isCritiqueOK);
+agent.addEdge(START, "plannerNode")
+    .addEdge("plannerNode", "critiqueNode")
+    .addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };

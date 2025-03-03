@@ -5,7 +5,8 @@ const agentState = Annotation.Root({
     inputCode: Annotation(),
     outputStructure: Annotation(),
     syntaxCheck: Annotation(),
-    critique: Annotation()
+    critique: Annotation(),
+    modelName: Annotation()
 });
 
 module.exports = { agentState }

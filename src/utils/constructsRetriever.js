@@ -21,6 +21,7 @@ async function findConstructs(document) {
             name: symbol.name,
             type: getSymbolKindName(symbol.kind),
             sourceCode: document.getText(symbol.range),
+            range: symbol.range,
         }));
 
         if (constructs.length === 0) {
@@ -30,10 +31,17 @@ async function findConstructs(document) {
         if (document.languageId === "python") {
             const mainBlock = extractPythonMainBlock(document);
             if (mainBlock) {
+                const startIndex = document.getText().indexOf(mainBlock);
+				const endIndex = startIndex + mainBlock.length;
+                const startPosition = document.positionAt(startIndex);
+                const endPosition = document.positionAt(endIndex);
+                const mainRange = new vscode.Range(startPosition, endPosition);
+
                 constructs.push({
                     name: "__main__",
                     type: "Main Block",
                     sourceCode: mainBlock,
+                    range: mainRange
                 });
             }
         }

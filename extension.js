@@ -1,8 +1,9 @@
 const vscode = require('vscode');
 const { agent } = require("./src/agent/agent");
-const { logger } = require("./src/utils/logger")
+//const { logger } = require("./src/utils/logger")
 const fs = require('fs'); // Use this to print image later
 const { findConstructs } = require("./src/utils/constructsRetriever")
+const { findMatches } = require("./src/utils/stringUtils")
 
 
 /**
@@ -28,17 +29,20 @@ function activate(context) {
 		fs.writeFileSync(filePath, buffer);
 
 		// run the agent
-		let risposta = [];
 		const constructs = await findConstructs(document);
 		if (constructs.length > 0) {
 			for (var construct of constructs) {
+				const startIndex = document.getText().indexOf(construct.sourceCode);
+				const endIndex = startIndex + construct.sourceCode.length;
+				const startPosition = document.positionAt(startIndex);
+                const endPosition = document.positionAt(endIndex);
 				vscode.window.showWarningMessage(
-					`Costrutto: ${construct.name}`
+					`${construct.name}, Start Line: ${startPosition.line}, End Line: ${endPosition.line}`
 				);
 				const agentResponse = await agentInstance.invoke({
+					modelName: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
 					inputCode: construct.sourceCode
 				});
-				risposta.push(agentResponse["outputStructure"]);
 
 				let outputList = [];
 				const outputStructure = agentResponse["outputStructure"];
@@ -47,13 +51,11 @@ function activate(context) {
 				} else if (outputStructure !== null && outputStructure !== undefined) {
 					outputList = [outputStructure]; // Se è un singolo valore, lo trasformiamo in array
 				}
-				console.log("\n\n\n\n\n")
-				console.log(document.getText())
-				console.log("\n\n\n\n\n")
 
 				for (const element of outputList) {
-					if (document.getText().includes(element["text"])) {
-						console.log("trovato match")
+					//findMatches(document.getText(construct.range), element["text"])  TODO ALGORITMO DI RICERCA CUSTOM
+					
+					if (document.getText(construct.range).includes(element["text"])) { 
 						const startIndex = document.getText().indexOf(element["text"]);
 						const endIndex = startIndex + element["text"].length;
 						const startPosition = document.positionAt(startIndex);
@@ -119,11 +121,11 @@ function activate(context) {
 									//border: "0px 0px 1px 0px solid gray",
 								},
 								borderWidth: '2px 2px 0 2px',
-								borderStyle: 'solid', 
+								borderStyle: 'solid',
 								borderSpacing: '2px',
 								borderColor: '#f00',
-						
-								
+
+
 							});
 
 							// Creiamo il range sulla riga corrispondente
@@ -153,14 +155,14 @@ function activate(context) {
 					}
 				}
 
+				//break;
 			}
 		}
 		else {
 			return;
-			risposta.push(await agentInstance.invoke({
-				inputCode: document.getText()
-			}));
+			// TO DO GESTIRE MANDANDO INTETO TESTO
 		}
+		return;
 		// stampo in editor le varie cose
 		let resultString = "";
 		let newRisposta = risposta["outputStructure"]; //lista di JSON
