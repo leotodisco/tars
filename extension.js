@@ -1,3 +1,4 @@
+const { LLMType} = require("./src/agent/agentState.js")
 const vscode = require('vscode');
 const { agent } = require("./src/agent/agent");
 const fs = require('fs'); // Use this to print image later
@@ -15,7 +16,8 @@ function activate(context) {
 		if (document === undefined) {
 			return;
 		}
-
+		console.log("STARTED")
+		
 		// Invoco agent
 		const agentInstance = agent.compile();
 
@@ -39,8 +41,9 @@ function activate(context) {
 					`${construct.name}, Start Line: ${startPosition.line}, End Line: ${endPosition.line}`
 				);
 				const agentResponse = await agentInstance.invoke({
-					modelName: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
-					inputCode: construct.sourceCode
+					modelName: "qwen2.5-coder:3b",
+					inputCode: construct.sourceCode,
+					llmType: LLMType.OLLAMA
 				});
 
 				let outputList = [];
@@ -62,21 +65,24 @@ function activate(context) {
 						const range = new vscode.Range(startPosition, endPosition);
 						const startLine = range.start.line;
 						const endLine = range.end.line;
-
+				
 						const explanation = element["description"];
-
+				
 						// 1️⃣ Troviamo la lunghezza massima delle righe di codice selezionate
 						let maxLineLength = 0;
 						for (let line = startLine; line <= endLine; line++) {
 							maxLineLength = Math.max(maxLineLength, document.lineAt(line).text.length);
 						}
-
-						// 2️⃣ Divideremo il testo della spiegazione su più righe se necessario
-						const maxCharsPerLine = 100; // Numero massimo di caratteri per riga della spiegazione
+				
+						// 2️⃣ Posizione fissa per la colonna della spiegazione
+						//const fixedColumn = maxLineLength + 5; // Colonna fissa dopo la riga più lunga + margine
+						const fixedColumn = 180
+						// 3️⃣ Divideremo il testo della spiegazione su più righe se necessario
+						const maxCharsPerLine = 280;
 						const words = explanation.split(" ");
 						let currentLine = "";
 						let explanationLines = [];
-
+				
 						words.forEach(word => {
 							if ((currentLine + word).length > maxCharsPerLine) {
 								explanationLines.push(currentLine);
@@ -86,66 +92,52 @@ function activate(context) {
 							}
 						});
 						explanationLines.push(currentLine.trim());
-
-						// 3️⃣ Se la spiegazione è più corta del blocco di codice, aggiungiamo righe vuote
+				
+						// 4️⃣ Se la spiegazione è più corta del blocco di codice, aggiungiamo righe vuote
 						while (explanationLines.length < endLine - startLine + 1) {
-							explanationLines.push(""); // Aggiunge righe vuote per uniformare l'aspetto visivo
+							explanationLines.push("");
 						}
-
-						// 4️⃣ Creiamo decorazioni per ogni riga della spiegazione, tutte allineate
+				
+						// 5️⃣ Creiamo decorazioni per ogni riga della spiegazione, tutte allineate alla stessa colonna
 						let decorations = [];
 						for (let i = 0; i < explanationLines.length; i++) {
 							let line = startLine + i;
 							if (line > endLine) break; // Non andiamo oltre il blocco di codice
-
+				
 							let text = explanationLines[i];
-
-							// Calcoliamo la differenza tra la riga più lunga e la riga attuale
-							let currentLineLength = document.lineAt(line).text.length;
-							let difference = maxLineLength - currentLineLength;
-
-							// Posizioniamo la spiegazione esattamente dopo la fine della riga più lunga
-							const adjustedColumn = currentLineLength + difference + 5; // Aggiungiamo un margine extra
-
-							// Creiamo una decorazione per ogni riga
+				
+							// Usiamo una colonna fissa per tutte le righe
 							const decorationType = vscode.window.createTextEditorDecorationType({
-								backgroundColor: "transparent", // Sfondo rosso trasparente su tutte le righe
+								backgroundColor: "transparent",
 								isWholeLine: false,
-								//isWholeLine: true, doing so the line will be entirely covered
 								after: {
-									contentText: `  ${text}`, // Se il testo è vuoto, lascia spazio per mantenere l'allineamento
+									contentText: `  ${text}`, // Testo della spiegazione
 									color: "white",
 									fontWeight: "1200",
-									//backgroundColor: "transparent",
 								},
 								borderWidth: '0px 0px 0 2px',
 								borderStyle: 'solid',
 								borderSpacing: '10px',
 								borderColor: "rgba(132, 205, 225, 0.92)",
-
-
 							});
-
-							// Creiamo il range sulla riga corrispondente
+				
+							// Posizioniamo la decorazione alla colonna fissa
 							const lineRange = new vscode.Range(
-								new vscode.Position(line, adjustedColumn),
-								new vscode.Position(line, adjustedColumn)
+								new vscode.Position(line, 180),
+								new vscode.Position(line, 180)
 							);
-
+				
 							decorations.push({ type: decorationType, range: lineRange });
 						}
-
-						// 5️⃣ Applichiamo tutte le decorazioni
+				
+						// 6️⃣ Applichiamo tutte le decorazioni
 						decorations.forEach(({ type, range }) => {
 							editor.setDecorations(type, [range]);
 						});
 
-
 					}
 
 					else {
-						console.log("\n\n no match here")
-						console.log(element["text"])
 						vscode.window.showWarningMessage(
 							`Non trovato match per: ${element["text"]}`
 						);

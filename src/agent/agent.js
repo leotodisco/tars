@@ -1,22 +1,18 @@
 const { END, START } = require("@langchain/langgraph");
 const { StateGraph } = require("@langchain/langgraph");
 const { ChatPromptTemplate } = require("@langchain/core/prompts");
-const { Ollama } = require("@langchain/ollama");
-const { MyCustomChatModel } = require("./myCustomChatModel");
+const { LLMFactory } = require("./llmFactory");
 const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils.js");
 const { doubleBraces, cleanLLMAnswer } = require("./agentUtils.js")
-const { agentState } = require("./agentState.js")
+const { agentState, LLMType } = require("./agentState.js")
+
 
 
 
 async function planner(state) {
     //const llm = new MyCustomChatModel({ model: state["modelName"] });
+    let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
 
-    // modularità se vuoi runnare in locale o in cloud
-    const llm = new Ollama({
-        baseUrl: "http://localhost:11434",
-        model: "qwen2.5:0.5b"
-    });
 
     const prompt = ChatPromptTemplate.fromMessages([
         [
@@ -43,12 +39,8 @@ async function planner(state) {
 }
 
 async function critiqueNode(state) {
-    //const llm = new MyCustomChatModel({ model: state["modelName"] });
-
-    const llm = new Ollama({
-        baseUrl: "http://localhost:11434",
-        model: "qwen2.5:0.5b"
-    });
+    let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
+    
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",
@@ -85,10 +77,10 @@ async function isCritiqueOK(state) {
 
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
-    //.addNode("critiqueNode", critiqueNode);
+//.addNode("critiqueNode", critiqueNode);
 
 agent.addEdge(START, "plannerNode").addEdge("plannerNode", END)
-    //.addEdge("plannerNode", "critiqueNode")
-    //.addConditionalEdges("critiqueNode", isCritiqueOK);
+//.addEdge("plannerNode", "critiqueNode")
+//.addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };
