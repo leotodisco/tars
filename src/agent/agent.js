@@ -10,13 +10,13 @@ const { agentState } = require("./agentState.js")
 
 
 async function planner(state) {
-    const llm = new MyCustomChatModel({ model: state["modelName"] });
+    //const llm = new MyCustomChatModel({ model: state["modelName"] });
 
     // modularità se vuoi runnare in locale o in cloud
-    // const llm = new Ollama({
-    //     baseUrl: "http://localhost:11434",
-    //     model: "qwen2.5:0.5b"
-    // });
+    const llm = new Ollama({
+        baseUrl: "http://localhost:11434",
+        model: "qwen2.5:0.5b"
+    });
 
     const prompt = ChatPromptTemplate.fromMessages([
         [
@@ -31,7 +31,7 @@ async function planner(state) {
 
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
-    let responseString = response.content.toString()
+    let responseString = response.toString()
     responseString = cleanLLMAnswer(responseString)
 
 
@@ -43,9 +43,12 @@ async function planner(state) {
 }
 
 async function critiqueNode(state) {
+    //const llm = new MyCustomChatModel({ model: state["modelName"] });
 
-
-    const llm = new MyCustomChatModel({ model: state["modelName"] });
+    const llm = new Ollama({
+        baseUrl: "http://localhost:11434",
+        model: "qwen2.5:0.5b"
+    });
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",
@@ -60,7 +63,7 @@ async function critiqueNode(state) {
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
 
-    let critiqueResponseString = response.content.toString()
+    let critiqueResponseString = response.toString()
     critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
 
     if (!critiqueResponseString) {
@@ -82,10 +85,10 @@ async function isCritiqueOK(state) {
 
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
-    .addNode("critiqueNode", critiqueNode);
+    //.addNode("critiqueNode", critiqueNode);
 
-agent.addEdge(START, "plannerNode")
-    .addEdge("plannerNode", "critiqueNode")
-    .addConditionalEdges("critiqueNode", isCritiqueOK);
+agent.addEdge(START, "plannerNode").addEdge("plannerNode", END)
+    //.addEdge("plannerNode", "critiqueNode")
+    //.addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };
