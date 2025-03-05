@@ -4,7 +4,7 @@ const { ChatPromptTemplate } = require("@langchain/core/prompts");
 const { LLMFactory } = require("./llmFactory");
 const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils.js");
 const { doubleBraces, cleanLLMAnswer } = require("./agentUtils.js")
-const { agentState, LLMType } = require("./agentState.js")
+const { agentState } = require("./agentState.js")
 
 
 
@@ -12,8 +12,6 @@ const { agentState, LLMType } = require("./agentState.js")
 async function planner(state) {
     //const llm = new MyCustomChatModel({ model: state["modelName"] });
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
-
-
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",
@@ -30,7 +28,6 @@ async function planner(state) {
     let responseString = response.toString()
     responseString = cleanLLMAnswer(responseString)
 
-
     if (!responseString) {
         return { inputCode: state["inputCode"] };
     }
@@ -40,7 +37,7 @@ async function planner(state) {
 
 async function critiqueNode(state) {
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
-    
+
     const prompt = ChatPromptTemplate.fromMessages([
         [
             "system",

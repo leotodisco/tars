@@ -1,4 +1,4 @@
-const { LLMType} = require("./src/agent/agentState.js")
+const { LLMType } = require("./src/agent/agentState.js")
 const vscode = require('vscode');
 const { agent } = require("./src/agent/agent");
 const fs = require('fs'); // Use this to print image later
@@ -17,7 +17,7 @@ function activate(context) {
 			return;
 		}
 		console.log("STARTED")
-		
+
 		// Invoco agent
 		const agentInstance = agent.compile();
 
@@ -65,15 +65,15 @@ function activate(context) {
 						const range = new vscode.Range(startPosition, endPosition);
 						const startLine = range.start.line;
 						const endLine = range.end.line;
-				
+
 						const explanation = element["description"];
-				
+
 						// 1️⃣ Troviamo la lunghezza massima delle righe di codice selezionate
 						let maxLineLength = 0;
 						for (let line = startLine; line <= endLine; line++) {
 							maxLineLength = Math.max(maxLineLength, document.lineAt(line).text.length);
 						}
-				
+
 						// 2️⃣ Posizione fissa per la colonna della spiegazione
 						//const fixedColumn = maxLineLength + 5; // Colonna fissa dopo la riga più lunga + margine
 						const fixedColumn = 180
@@ -82,7 +82,7 @@ function activate(context) {
 						const words = explanation.split(" ");
 						let currentLine = "";
 						let explanationLines = [];
-				
+
 						words.forEach(word => {
 							if ((currentLine + word).length > maxCharsPerLine) {
 								explanationLines.push(currentLine);
@@ -92,20 +92,20 @@ function activate(context) {
 							}
 						});
 						explanationLines.push(currentLine.trim());
-				
+
 						// 4️⃣ Se la spiegazione è più corta del blocco di codice, aggiungiamo righe vuote
 						while (explanationLines.length < endLine - startLine + 1) {
 							explanationLines.push("");
 						}
-				
+
 						// 5️⃣ Creiamo decorazioni per ogni riga della spiegazione, tutte allineate alla stessa colonna
 						let decorations = [];
 						for (let i = 0; i < explanationLines.length; i++) {
 							let line = startLine + i;
 							if (line > endLine) break; // Non andiamo oltre il blocco di codice
-				
+
 							let text = explanationLines[i];
-				
+
 							// Usiamo una colonna fissa per tutte le righe
 							const decorationType = vscode.window.createTextEditorDecorationType({
 								backgroundColor: "transparent",
@@ -120,16 +120,16 @@ function activate(context) {
 								borderSpacing: '10px',
 								borderColor: "rgba(132, 205, 225, 0.92)",
 							});
-				
+
 							// Posizioniamo la decorazione alla colonna fissa
 							const lineRange = new vscode.Range(
 								new vscode.Position(line, 180),
 								new vscode.Position(line, 180)
 							);
-				
+
 							decorations.push({ type: decorationType, range: lineRange });
 						}
-				
+
 						// 6️⃣ Applichiamo tutte le decorazioni
 						decorations.forEach(({ type, range }) => {
 							editor.setDecorations(type, [range]);
