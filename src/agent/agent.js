@@ -10,6 +10,8 @@ const { agentState } = require("./agentState.js")
 
 
 async function planner(state) {
+    console.log("src, ", state["inputCode"])
+    console.log(doubleBraces("DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"]))
     //const llm = new MyCustomChatModel({ model: state["modelName"] });
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
     const prompt = ChatPromptTemplate.fromMessages([
