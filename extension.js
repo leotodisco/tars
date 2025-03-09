@@ -35,11 +35,7 @@ function activate(context) {
 			construct.type === "Class"
 		)) {
 			for (var construct of constructs) {
-				const startIndex = document.getText().indexOf(construct.sourceCode);
-				const endIndex = startIndex + construct.sourceCode.length;
-				const startPosition = document.positionAt(startIndex);
-				const endPosition = document.positionAt(endIndex);
-		
+ 
 				const agentResponse = await agentInstance.invoke({
 					modelName: "qwen2.5-coder:3b",
 					inputCode: construct.sourceCode,

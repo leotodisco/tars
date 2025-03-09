@@ -26,7 +26,7 @@ async function planner(state) {
         state["currentAttemptNumber"] = 0;
     }
     // CASO IN CUI IL JSON PRECEDENTEMENTE GENERATO HA ERRORI SINTATTICI
-    else if(state["syntaxCheckMessage"] !== "OK") {
+    else if (state["syntaxCheckMessage"] !== "OK") {
         logger.warn("agent", "syntax error found.")
         var prompt = ChatPromptTemplate.fromMessages([
             [
@@ -36,6 +36,22 @@ async function planner(state) {
             [
                 "user",
                 doubleBraces("DO NOT ADD ```json in the response. This is the source code: " + state["inputCode"] + " Correct the JSON you generated before as its structure is not correct: " + state["outputString"])
+            ],
+        ]);
+
+        state["currentAttemptNumber"] = state["currentAttemptNumber"] + 1;
+    }
+    // CASO IN CUI ABBIAMO UNA CRITICA
+    else if (state["critique"] !== "OK") {
+        logger.warn("agent", "critique found.")
+        var prompt = ChatPromptTemplate.fromMessages([
+            [
+                "system",
+                PLANNING_SYSTEM_PROMPT
+            ],
+            [
+                "user",
+                doubleBraces("DO NOT ADD ```json in the response. This is the source code: " + state["inputCode"] + " This is your older answer: " + state["outputString"] + " this is my critique for you: " + state["critique"])
             ],
         ]);
 
@@ -84,11 +100,11 @@ async function critiqueNode(state) {
 
     let critiqueResponseString = response.toString()
     critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
+    console.log("critique response = ", critiqueResponseString)
 
     if (!critiqueResponseString) {
         return { inputCode: state["inputCode"] };
     }
-
 
     return { critique: critiqueResponseString };
 }
@@ -101,12 +117,12 @@ async function isCritiqueOK(state) {
         if (state["currentAttemptNumber"] > state["maxAttempts"]) {
             return END
         }
-        return "plannerNode"
+    return "plannerNode"
 }
 
 async function isSyntaxOK(state) {
     logger.info("agent", `attempt n ${state["currentAttemptNumber"]} `)
-    if (state["syntaxCheckMessage"] === "OK" ) {
+    if (state["syntaxCheckMessage"] === "OK") {
         return "critiqueNode";
     }
     else
@@ -114,18 +130,16 @@ async function isSyntaxOK(state) {
             return END
         }
 
-        return "plannerNode"
+    return "plannerNode"
 }
 
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
     .addNode("syntaxCheck", syntaxCheckNode)
-//.addNode("critiqueNode", critiqueNode);
-
-agent.addEdge(START, "plannerNode")
-.addEdge("plannerNode", "syntaxCheck")
-.addConditionalEdges("syntaxCheck", isSyntaxOK);
-//.addEdge("plannerNode", "critiqueNode")
-//.addConditionalEdges("critiqueNode", isCritiqueOK);
+    .addNode("critiqueNode", critiqueNode)
+    .addEdge(START, "plannerNode")
+    .addEdge("plannerNode", "syntaxCheck")
+    .addConditionalEdges("syntaxCheck", isSyntaxOK)
+    .addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };
