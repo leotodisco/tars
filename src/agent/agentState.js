@@ -3,11 +3,14 @@ const { Annotation } = require("@langchain/langgraph");
 const agentState = Annotation.Root({
     document: Annotation(),
     inputCode: Annotation(),
+    outputString: Annotation(),
     outputStructure: Annotation(),
-    syntaxCheck: Annotation(),
+    syntaxCheckMessage: Annotation(),
     critique: Annotation(),
     modelName: Annotation(),
-    llmType: Annotation()
+    llmType: Annotation(),
+    maxAttempts: Annotation(),
+    currentAttemptNumber: Annotation()
 });
 
 class LLMType {

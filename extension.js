@@ -17,8 +17,6 @@ function activate(context) {
 			return;
 		}
 		console.log("STARTED")
-
-		// Invoco agent
 		const agentInstance = agent.compile();
 
 		//print agent image
@@ -41,14 +39,12 @@ function activate(context) {
 				const endIndex = startIndex + construct.sourceCode.length;
 				const startPosition = document.positionAt(startIndex);
 				const endPosition = document.positionAt(endIndex);
-				vscode.window.showWarningMessage(
-					`${construct.name}, Start Line: ${startPosition.line}, End Line: ${endPosition.line}`
-				);
 		
 				const agentResponse = await agentInstance.invoke({
 					modelName: "qwen2.5-coder:3b",
 					inputCode: construct.sourceCode,
-					llmType: LLMType.OLLAMA
+					llmType: LLMType.OLLAMA,
+					maxAttempts: 4
 				});
 
 				let outputList = [];

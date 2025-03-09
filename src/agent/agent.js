@@ -5,25 +5,42 @@ const { LLMFactory } = require("./llmFactory");
 const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils.js");
 const { doubleBraces, cleanLLMAnswer } = require("./agentUtils.js")
 const { agentState } = require("./agentState.js")
-
-
-
+const { logger } = require("../utils/logger")
 
 async function planner(state) {
-    console.log("src, ", state["inputCode"])
-    console.log(doubleBraces("DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"]))
-    //const llm = new MyCustomChatModel({ model: state["modelName"] });
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
-    const prompt = ChatPromptTemplate.fromMessages([
-        [
-            "system",
-            PLANNING_SYSTEM_PROMPT
-        ],
-        [
-            "user",
-            doubleBraces("DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"])
-        ],
-    ]);
+
+    // CASO BASE: PRIMA RUN
+    if (state["syntaxCheckMessage"] === undefined) {
+        var prompt = ChatPromptTemplate.fromMessages([
+            [
+                "system",
+                PLANNING_SYSTEM_PROMPT
+            ],
+            [
+                "user",
+                doubleBraces("DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"])
+            ],
+        ]);
+
+        state["currentAttemptNumber"] = 0;
+    }
+    // CASO IN CUI IL JSON PRECEDENTEMENTE GENERATO HA ERRORI SINTATTICI
+    else if(state["syntaxCheckMessage"] !== "OK") {
+        logger.warn("agent", "syntax error found.")
+        var prompt = ChatPromptTemplate.fromMessages([
+            [
+                "system",
+                PLANNING_SYSTEM_PROMPT
+            ],
+            [
+                "user",
+                doubleBraces("DO NOT ADD ```json in the response. This is the source code: " + state["inputCode"] + " Correct the JSON you generated before as its structure is not correct: " + state["outputString"])
+            ],
+        ]);
+
+        state["currentAttemptNumber"] = state["currentAttemptNumber"] + 1;
+    }
 
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
@@ -34,7 +51,18 @@ async function planner(state) {
         return { inputCode: state["inputCode"] };
     }
 
-    return { inputCode: state["inputCode"], outputStructure: JSON.parse(responseString) };
+    return { inputCode: state["inputCode"], outputString: responseString, currentAttemptNumber: state["currentAttemptNumber"] };
+}
+
+// voglio vedere se ciò che LLM ha generato è un JSON
+async function syntaxCheckNode(state) {
+    try {
+        JSON.parse(state["outputString"])
+    } catch (err) {
+        logger.error("agent", "JSON was not correct")
+        return { syntaxCheckMessage: `The following string does not represent a correct JSON, please correct it. ${state["outputString"]}` }
+    }
+    return { syntaxCheckMessage: `OK`, outputStructure: JSON.parse(state["outputString"]) }
 }
 
 async function critiqueNode(state) {
@@ -58,7 +86,6 @@ async function critiqueNode(state) {
     critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
 
     if (!critiqueResponseString) {
-
         return { inputCode: state["inputCode"] };
     }
 
@@ -71,14 +98,33 @@ async function isCritiqueOK(state) {
         return END;
     }
     else
+        if (state["currentAttemptNumber"] > state["maxAttempts"]) {
+            return END
+        }
+        return "plannerNode"
+}
+
+async function isSyntaxOK(state) {
+    logger.info("agent", `attempt n ${state["currentAttemptNumber"]} `)
+    if (state["syntaxCheckMessage"] === "OK" ) {
+        return "critiqueNode";
+    }
+    else
+        if (state["currentAttemptNumber"] > state["maxAttempts"]) {
+            return END
+        }
+
         return "plannerNode"
 }
 
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
+    .addNode("syntaxCheck", syntaxCheckNode)
 //.addNode("critiqueNode", critiqueNode);
 
-agent.addEdge(START, "plannerNode").addEdge("plannerNode", END)
+agent.addEdge(START, "plannerNode")
+.addEdge("plannerNode", "syntaxCheck")
+.addConditionalEdges("syntaxCheck", isSyntaxOK);
 //.addEdge("plannerNode", "critiqueNode")
 //.addConditionalEdges("critiqueNode", isCritiqueOK);
 
