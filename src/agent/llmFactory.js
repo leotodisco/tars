@@ -9,12 +9,12 @@ const LLMFactory = {
 
         switch (llmType) {
             case LLMType.OLLAMA:
-                logger.info("agent", "Created Ollama Model");
                 llm = new Ollama({
                     baseUrl: "http://localhost:11434",
                     model: modelName,
                     temperature: 0
                 });
+                logger.info("agent", "Created Ollama Model");
                 break;
 
             case LLMType.OPENAI:

@@ -20,12 +20,12 @@ function activate(context) {
 		const agentInstance = agent.compile();
 
 		//print agent image
-		// const drawableGraph = await agentInstance.getGraphAsync()
-		// const png = await drawableGraph.drawMermaidPng()
-		// const arrayBuffer = await png.arrayBuffer();
-		// const buffer = Buffer.from(arrayBuffer);
-		// const filePath = '/Users/leopoldotodisco/Desktop/MasterThesis/tars/conditional-graph.png';
-		// fs.writeFileSync(filePath, buffer);
+		const drawableGraph = await agentInstance.getGraphAsync()
+		const png = await drawableGraph.drawMermaidPng()
+		const arrayBuffer = await png.arrayBuffer();
+		const buffer = Buffer.from(arrayBuffer);
+		const filePath = '/Users/leopoldotodisco/Desktop/MasterThesis/tars/conditional-graph.png';
+		fs.writeFileSync(filePath, buffer);
 
 		// run the agent
 		const constructs = await findConstructs(document);
@@ -135,16 +135,16 @@ function activate(context) {
 					}
 
 					else {
-						vscode.window.showWarningMessage(
-							`Non trovato match per: ${element["text"]}`
-						);
+						// vscode.window.showWarningMessage(
+						// 	`Non trovato match per: ${element["text"]}`
+						// );
+						console.log(`Non trovato match per: ${element["text"]}`)
 					}
 				}
 
 			}
 		}
 		else {
-			console.log("sono in else")
 			const agentResponse = await agentInstance.invoke({
 				modelName: "qwen2.5-coder:3b",
 				inputCode: document.getText(),

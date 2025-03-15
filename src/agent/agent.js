@@ -66,7 +66,7 @@ async function planner(state) {
     if (!responseString) {
         return { inputCode: state["inputCode"] };
     }
-
+    console.log(responseString)
     return { inputCode: state["inputCode"], outputString: responseString, currentAttemptNumber: state["currentAttemptNumber"] };
 }
 
