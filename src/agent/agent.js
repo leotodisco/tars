@@ -9,7 +9,7 @@ const { logger } = require("../utils/logger")
 
 async function planner(state) {
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
-
+    logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN
     if (state["syntaxCheckMessage"] === undefined) {
         var prompt = ChatPromptTemplate.fromMessages([
@@ -19,7 +19,7 @@ async function planner(state) {
             ],
             [
                 "user",
-                doubleBraces("DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"])
+                doubleBraces(" DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"])
             ],
         ]);
 

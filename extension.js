@@ -4,6 +4,7 @@ const { agent } = require("./src/agent/agent");
 const fs = require('fs'); // Use this to print image later
 const { findConstructs } = require("./src/utils/constructsRetriever")
 const { findMatches } = require("./src/utils/stringUtils")
+const { runTomQuiz } = require("./src/tom/tomQuiz.js")
 
 
 /**
@@ -27,22 +28,35 @@ function activate(context) {
 		const filePath = '/Users/leopoldotodisco/Desktop/MasterThesis/tars/conditional-graph.png';
 		fs.writeFileSync(filePath, buffer);
 
-		// run the agent
+		// controlla se nel contesto dell'estensione è presente lo stato mentale dell'utente
+		let userMind = context.globalState.get('userMind');
+		console.log("userMind PRIMA DI IF: ")
+		console.log(userMind)
+		console.log("\n\n\n")
+		if (!userMind) {
+			await runTomQuiz(context);
+			userMind = context.globalState.get('userMind');
+			console.log("IN IF userMind: ")
+			console.log(userMind)
+			console.log("\n\n\n")
+
+		}
+
+		// find all the constructs in the document
 		const constructs = await findConstructs(document);
-		if (constructs.some(construct => 
-			construct.type === "Method" || 
-			construct.type === "Function" || 
+		if (constructs.some(construct =>
+			construct.type === "Method" ||
+			construct.type === "Function" ||
 			construct.type === "Class"
 		)) {
+			// for each construct run the agent
 			for (var construct of constructs) {
- 
 				const agentResponse = await agentInstance.invoke({
 					modelName: "qwen2.5-coder:3b",
 					inputCode: construct.sourceCode,
 					llmType: LLMType.OLLAMA,
 					maxAttempts: 4
 				});
-
 				let outputList = [];
 				const outputStructure = agentResponse["outputStructure"];
 				if (Array.isArray(outputStructure)) {
@@ -50,8 +64,9 @@ function activate(context) {
 				} else if (outputStructure !== null && outputStructure !== undefined) {
 					outputList = [outputStructure]; // Se è un singolo valore, lo trasformiamo in array
 				}
-
+				let elementIndex = -1
 				for (const element of outputList) {
+					elementIndex += 1;
 					//findMatches(document.getText(construct.range), element["text"])  TODO ALGORITMO DI RICERCA CUSTOM
 					if (document.getText(construct.range).includes(element["text"])) {
 						const startIndex = document.getText().indexOf(element["text"]);
@@ -71,9 +86,6 @@ function activate(context) {
 							maxLineLength = Math.max(maxLineLength, document.lineAt(line).text.length);
 						}
 
-						// 2️⃣ Posizione fissa per la colonna della spiegazione
-						//const fixedColumn = maxLineLength + 5; // Colonna fissa dopo la riga più lunga + margine
-						const fixedColumn = 180
 						// 3️⃣ Divideremo il testo della spiegazione su più righe se necessario
 						const maxCharsPerLine = 280;
 						const words = explanation.split(" ");
@@ -92,7 +104,7 @@ function activate(context) {
 
 						// 4️⃣ Se la spiegazione è più corta del blocco di codice, aggiungiamo righe vuote
 						while (explanationLines.length < endLine - startLine + 1) {
-							explanationLines.push("");
+							explanationLines.push(" ");
 						}
 
 						// 5️⃣ Creiamo decorazioni per ogni riga della spiegazione, tutte allineate alla stessa colonna
@@ -102,6 +114,10 @@ function activate(context) {
 							if (line > endLine) break; // Non andiamo oltre il blocco di codice
 
 							let text = explanationLines[i];
+							const borderColor = elementIndex % 2 === 0
+								? "rgba(132, 205, 225, 0.92)"
+								: "rgba(12, 245, 12, 0.92)";
+							console.log("BORDER COLOR ", borderColor)
 
 							// Usiamo una colonna fissa per tutte le righe
 							const decorationType = vscode.window.createTextEditorDecorationType({
@@ -115,7 +131,7 @@ function activate(context) {
 								borderWidth: '0px 0px 0 2px',
 								borderStyle: 'solid',
 								borderSpacing: '10px',
-								borderColor: "rgba(132, 205, 225, 0.92)",
+								borderColor: borderColor,
 							});
 
 							// Posizioniamo la decorazione alla colonna fissa
@@ -140,6 +156,8 @@ function activate(context) {
 						// );
 						console.log(`Non trovato match per: ${element["text"]}`)
 					}
+
+					
 				}
 
 			}
