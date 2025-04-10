@@ -13,7 +13,7 @@ function runTomQuiz(context) {
 
 	const panel = vscode.window.createWebviewPanel(
 		"quizWebview",
-		"Quiz Interattivo",
+		"Theory Of Mind Profiler",
 		vscode.ViewColumn.Beside,
 		{ enableScripts: true }
 	);
@@ -25,7 +25,6 @@ function runTomQuiz(context) {
 		async (message) => {
 			if (message.type === "quizResponse") {
 				await saveAnswer(context, message.value["answer"], message.value["question"]);
-				vscode.window.showInformationMessage(`Domanda: ${message.value["question"]}; Risposta: ${message.value["answer"]}`);
 			}
 		},
 		undefined,
@@ -49,11 +48,47 @@ function getQuizHtml(webview, context) {
 			</style>
 		</head>
 		<body>
-			<h2>Qual è il tuo linguaggio di programmazione preferito?</h2>
-			<button onclick="sendAnswer('JavaScript', 'Qual è il tuo linguaggio di programmazione preferito?')">JavaScript</button>
-			<button onclick="sendAnswer('Python', 'Qual è il tuo linguaggio di programmazione preferito?')">Python</button>
-			<button onclick="sendAnswer('C++', 'Qual è il tuo linguaggio di programmazione preferito?')">C++</button>
-			<button onclick="sendAnswer('TypeScript', 'Qual è il tuo linguaggio di programmazione preferito?')">TypeScript</button>
+			<h2>What is your programming experience level?</h2>
+			<button onclick="sendAnswer('Beginner', 'What is your programming experience level?')">Beginner</button>
+			<button onclick="sendAnswer('Intermediate', 'What is your programming experience level?')">Intermediate</button>
+			<button onclick="sendAnswer('Expert', 'What is your programming experience level?')">Expert</button>
+			<button onclick="sendAnswer('Mentor/Professional', 'What is your programming experience level?')">Mentor/Professional</button>
+
+			<h2>What is your current role?</h2>
+			<button onclick="sendAnswer('Student', 'What is your current role?')">Student</button>
+			<button onclick="sendAnswer('Junior Developer', 'What is your current role?')">Junior Developer</button>
+			<button onclick="sendAnswer('Senior Developer', 'What is your current role?')">Senior Developer</button>
+			<button onclick="sendAnswer('Researcher', 'What is your current role?')">Researcher</button>
+
+			<h2>Why are you using this extension?</h2>
+			<button onclick="sendAnswer('To learn a language', 'Why are you using this extension?')">To learn a language</button>
+			<button onclick="sendAnswer('To boost productivity', 'Why are you using this extension?')">To boost productivity</button>
+			<button onclick="sendAnswer('To prepare for an exam or interview', 'Why are you using this extension?')">To prepare for an exam or interview</button>
+			<button onclick="sendAnswer('To write cleaner code', 'Why are you using this extension?')">To write cleaner code</button>
+
+			<h2>How do you prefer to receive explanations?</h2>
+			<button onclick="sendAnswer('Short and direct', 'How do you prefer to receive explanations?')">Short and direct</button>
+			<button onclick="sendAnswer('Detailed and technical', 'How do you prefer to receive explanations?')">Detailed and technical</button>
+
+			<h2>Which languages do you mainly use?</h2>
+			<button onclick="sendAnswer('JavaScript', 'Which languages do you mainly use?')">JavaScript</button>
+			<button onclick="sendAnswer('Python', 'Which languages do you mainly use?')">Python</button>
+			<button onclick="sendAnswer('TypeScript', 'Which languages do you mainly use?')">TypeScript</button>
+			<button onclick="sendAnswer('C++', 'Which languages do you mainly use?')">C++</button>
+			<button onclick="sendAnswer('Java', 'Which languages do you mainly use?')">Java</button>
+			<button onclick="sendAnswer('Other', 'Which languages do you mainly use?')">Other</button>
+
+			<h2>What is your main goal with this extension?</h2>
+			<button onclick="sendAnswer('Learning new things', 'What is your main goal with this extension?')">Learning new things</button>
+			<button onclick="sendAnswer('Saving time', 'What is your main goal with this extension?')">Saving time</button>
+			<button onclick="sendAnswer('Better understanding my code', 'What is your main goal with this extension?')">Better understanding my code</button>
+			<button onclick="sendAnswer('Getting real-time development help', 'What is your main goal with this extension?')">Getting real-time development help</button>
+
+			<h2>What tone do you prefer from the assistant?</h2>
+			<button onclick="sendAnswer('Friendly', 'What tone do you prefer from the assistant?')">Friendly</button>
+			<button onclick="sendAnswer('Professional', 'What tone do you prefer from the assistant?')">Professional</button>
+			<button onclick="sendAnswer('Neutral', 'What tone do you prefer from the assistant?')">Neutral</button>
+
 
 			<script>
 				const vscode = acquireVsCodeApi();
@@ -73,12 +108,23 @@ async function saveAnswer(context, answer, question) {
 	await context.globalState.update("userMind", savedAnswers);
 }
 
-// Funzione per recuperare le risposte salvate
+/**
+ * Funzione per recuperare le risposte salvate
+ * @param {vscode.ExtensionContext} context
+ */
 function getSavedAnswers(context) {
 	return context.globalState.get("userMind") || [];
 }
 
+/**
+ * @param {vscode.ExtensionContext} context
+ */
+function flushUserMind(context) {
+	context.globalState.update("userMind", null)
+}
+
 module.exports = {
 	runTomQuiz,
-	getSavedAnswers
+	getSavedAnswers,
+	flushUserMind
 };

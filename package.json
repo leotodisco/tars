@@ -17,6 +17,14 @@
       {
         "command": "tars.explain-code",
         "title": "Explain Code"
+      },
+      {
+        "command": "tars.flush",
+        "title": "Flush Tars State"
+      },
+      {
+        "command": "tars.tom",
+        "title": "Theory Of Mind Profiler"
       }
     ]
   },

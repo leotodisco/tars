@@ -19,7 +19,7 @@ async function planner(state) {
             ],
             [
                 "user",
-                doubleBraces(" DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. This is the source code: " + state["inputCode"])
+                state["userProfile"] + doubleBraces(" DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. \nSource code: " + state["inputCode"])
             ],
         ]);
 
@@ -123,7 +123,8 @@ async function isCritiqueOK(state) {
 async function isSyntaxOK(state) {
     logger.info("agent", `attempt n ${state["currentAttemptNumber"]} `)
     if (state["syntaxCheckMessage"] === "OK") {
-        return "critiqueNode";
+        //return "critiqueNode";
+        return END;
     }
     else
         if (state["currentAttemptNumber"] > state["maxAttempts"]) {
@@ -136,10 +137,10 @@ async function isSyntaxOK(state) {
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
     .addNode("syntaxCheck", syntaxCheckNode)
-    .addNode("critiqueNode", critiqueNode)
+    //.addNode("critiqueNode", critiqueNode)
     .addEdge(START, "plannerNode")
     .addEdge("plannerNode", "syntaxCheck")
     .addConditionalEdges("syntaxCheck", isSyntaxOK)
-    .addConditionalEdges("critiqueNode", isCritiqueOK);
+    //.addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };

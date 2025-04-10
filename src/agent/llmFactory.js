@@ -20,6 +20,7 @@ const LLMFactory = {
             case LLMType.OPENAI:
                 logger.info("agent", "Created OpenAI Model");
                 llm = new OpenAI({
+                    apiKey: "sk-ijklqrst5678uvwxijklqrst5678uvwxijklqrst",
                     modelName: modelName,
                     temperature: 0,
                     maxTokens: 1000,

@@ -4,7 +4,7 @@ const { agent } = require("./src/agent/agent");
 const fs = require('fs'); // Use this to print image later
 const { findConstructs } = require("./src/utils/constructsRetriever")
 const { findMatches } = require("./src/utils/stringUtils")
-const { runTomQuiz } = require("./src/tom/tomQuiz.js")
+const { runTomQuiz, flushUserMind } = require("./src/tom/tomQuiz.js")
 
 
 /**
@@ -12,8 +12,8 @@ const { runTomQuiz } = require("./src/tom/tomQuiz.js")
  */
 function activate(context) {
 	const explainCodeCommand = vscode.commands.registerCommand('tars.explain-code', async () => {
-		const document = vscode.window.activeTextEditor?.document;
 		const editor = vscode.window.activeTextEditor;
+		const document = vscode.window.activeTextEditor?.document;
 		if (document === undefined) {
 			return;
 		}
@@ -30,17 +30,21 @@ function activate(context) {
 
 		// controlla se nel contesto dell'estensione è presente lo stato mentale dell'utente
 		let userMind = context.globalState.get('userMind');
-		console.log("userMind PRIMA DI IF: ")
+		console.log("\n\n\n")
 		console.log(userMind)
 		console.log("\n\n\n")
 		if (!userMind) {
 			await runTomQuiz(context);
 			userMind = context.globalState.get('userMind');
-			console.log("IN IF userMind: ")
-			console.log(userMind)
-			console.log("\n\n\n")
-
 		}
+
+		let contextString = "programming experience: " + userMind[0]["answer"] + 
+		" role: " + userMind[1]["answer"] +
+		" The user is using this LLM: " + userMind[2]["answer"] +
+		" The user wants the explanation that are: " + userMind[3]["answer"] +
+		" The is very confident in: " + userMind[4]["answer"] +
+		" The goal of the user is to: " + userMind[5]["answer"] +
+		" Use the following tone: " + userMind[6]["answer"]
 
 		// find all the constructs in the document
 		const constructs = await findConstructs(document);
@@ -52,10 +56,11 @@ function activate(context) {
 			// for each construct run the agent
 			for (var construct of constructs) {
 				const agentResponse = await agentInstance.invoke({
-					modelName: "qwen2.5-coder:3b",
+					modelName: "qwen2.5:3b",
 					inputCode: construct.sourceCode,
 					llmType: LLMType.OLLAMA,
-					maxAttempts: 4
+					maxAttempts: 4,
+					userProfile: contextString
 				});
 				let outputList = [];
 				const outputStructure = agentResponse["outputStructure"];
@@ -117,7 +122,6 @@ function activate(context) {
 							const borderColor = elementIndex % 2 === 0
 								? "rgba(132, 205, 225, 0.92)"
 								: "rgba(12, 245, 12, 0.92)";
-							console.log("BORDER COLOR ", borderColor)
 
 							// Usiamo una colonna fissa per tutte le righe
 							const decorationType = vscode.window.createTextEditorDecorationType({
@@ -149,24 +153,15 @@ function activate(context) {
 						});
 
 					}
-
-					else {
-						// vscode.window.showWarningMessage(
-						// 	`Non trovato match per: ${element["text"]}`
-						// );
-						console.log(`Non trovato match per: ${element["text"]}`)
-					}
-
-					
 				}
-
 			}
 		}
 		else {
 			const agentResponse = await agentInstance.invoke({
-				modelName: "qwen2.5-coder:3b",
+				modelName: "qwen2.5:3b",
 				inputCode: document.getText(),
-				llmType: LLMType.OLLAMA
+				llmType: LLMType.OLLAMA,
+				userProfile: contextString
 			});
 
 			let outputList = [];
@@ -267,7 +262,17 @@ function activate(context) {
 		return;
 	});
 
+	const flushState = vscode.commands.registerCommand('tars.flush', async () => {
+		flushUserMind(context);
+	});
+
+	const tomQuiz = vscode.commands.registerCommand('tars.tom', async () => {
+		await runTomQuiz(context);
+	})
+
 	context.subscriptions.push(explainCodeCommand);
+	context.subscriptions.push(flushState);
+	context.subscriptions.push(tomQuiz);
 }
 
 // This method is called when your extension is deactivated
