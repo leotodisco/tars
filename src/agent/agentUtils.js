@@ -2,12 +2,12 @@ const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's men
 
 Your task is to:
 1. Analyze the code.
-2. Split it into multiple **clusters**, where each cluster represents a group of lines that share a clear and related purpose (e.g., function body, if block, loop, single-line statement with a distinct purpose).
+2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that share a clear and related purpose (e.g., function body, if block, loop, single-line statement with a distinct purpose).
+ Each cluster must represent a meaningful, self-contained unit of logic.
 3. For each cluster, return a dictionary with the following structure:
 
-
 {{
-    "text": "code snippet as-is, preserving the original formatting and indentation",
+    "text": "cluster code snippet as-is, preserving the original formatting and indentation",
     "description": "a natural language explanation of what this cluster does written following the user mental state"
 }}
 
@@ -18,14 +18,11 @@ When writing the description you must **ALWAYS** consider the user mental state
 **Important rules**:
 - **Always consider the User's mental state** when writing the description (e.g., experience level, learning goal, tone preference).
 - **NEVER** change the number of spaces or indentation in the "text" field. The formatting must remain exactly as in the original code.
-- Each cluster must represent a meaningful, self-contained unit of logic.
-- The "text" section should never start with "\n" or spaces because it breaks the parser.
 - The output **must contain multiple clusters** — do not return a single block of code.
 - Maintain the **original code sequence**; do not reorder the clusters.
+- IMPORTANT: Do **not** provide line by line explanation, unless the user preferences claim so.
 - Do **not** include any introductory or explanatory text.
-- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.
-
-Your output should be a clean JSON array of dictionaries, ready for automatic parsing.`;
+- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.`;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
 {{
@@ -57,11 +54,11 @@ function escapeCurlyBraces(input) {
 
 /**
  * This function removes unnecessary tokens from the LLM Answers
- * @param {string} LLMAnswer
+ * @param {import("@langchain/core/messages").MessageContent} LLMAnswer
  */
 function cleanLLMAnswer(LLMAnswer, programmingLanguage = "") {
     // Deepseek-specific cleaning
-    let responseString = LLMAnswer.split("</think>\n").pop();
+    let responseString = LLMAnswer.toString().split("</think>\n").pop();
 
     // check if this starts with ```json or ```language
     if (responseString.startsWith('\`\`\`json') || responseString.startsWith(' \`\`\`json') || responseString.startsWith('\n\`\`\`json')) {

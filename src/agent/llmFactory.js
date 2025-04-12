@@ -1,7 +1,8 @@
-const { Ollama } = require("@langchain/ollama");
-const { OpenAI } = require("@langchain/OpenAI");
+const { ChatOllama } = require("@langchain/ollama");
+const { ChatOpenAI } = require("@langchain/OpenAI");
 const { logger } = require("../utils/logger");
 const { LLMType } = require("./agentState");
+require('dotenv').config({'path': "/Users/leopoldotodisco/Desktop/MasterThesis/tars/src/.env"});
 
 const LLMFactory = {
     createLLM: function (llmType, modelName) {
@@ -9,7 +10,7 @@ const LLMFactory = {
 
         switch (llmType) {
             case LLMType.OLLAMA:
-                llm = new Ollama({
+                llm = new ChatOllama({
                     baseUrl: "http://localhost:11434",
                     model: modelName,
                     temperature: 0
@@ -19,19 +20,19 @@ const LLMFactory = {
 
             case LLMType.OPENAI:
                 logger.info("agent", "Created OpenAI Model");
-                llm = new OpenAI({
-                    apiKey: "sk-ijklqrst5678uvwxijklqrst5678uvwxijklqrst",
-                    modelName: modelName,
+                llm = new ChatOpenAI({
+                    apiKey: process.env.OPENAI_API_KEY,
+                    model: modelName,
                     temperature: 0,
-                    maxTokens: 1000,
-                    maxRetries: 5
+                    maxTokens: 4000,
+                    maxRetries: 2
                 });
                 break;
 
             case LLMType.DEEPSEEK:
                 logger.info("agent", "Created DeepSeek Model");
-                llm = new OpenAI({
-                    modelName: modelName,
+                llm = new ChatOpenAI({
+                    model: modelName,
                     temperature: 0,
                     maxTokens: 1000,
                     maxRetries: 5

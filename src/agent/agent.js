@@ -60,7 +60,7 @@ async function planner(state) {
 
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
-    let responseString = response.toString()
+    let responseString = response["content"]
     responseString = cleanLLMAnswer(responseString)
 
     if (!responseString) {
@@ -75,7 +75,7 @@ async function syntaxCheckNode(state) {
     try {
         JSON.parse(state["outputString"])
     } catch (err) {
-        logger.error("agent", `JSON was not correct - error: ${err}` )
+        logger.error("agent", `JSON was not correct - error: ${err}`)
         return { syntaxCheckMessage: `The following string does not represent a correct JSON, please correct it. ${state["outputString"]}` }
     }
     return { syntaxCheckMessage: `OK`, outputStructure: JSON.parse(state["outputString"]) }

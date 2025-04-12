@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@huggingface/inference": "^3.4.1",
+    "@langchain/core": "^0.3.44",
     "@langchain/langgraph": "^0.2.51",
     "@langchain/ollama": "^0.2.0",
     "@langchain/openai": "^0.4.4",
