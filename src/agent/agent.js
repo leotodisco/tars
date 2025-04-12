@@ -75,7 +75,7 @@ async function syntaxCheckNode(state) {
     try {
         JSON.parse(state["outputString"])
     } catch (err) {
-        logger.error("agent", "JSON was not correct")
+        logger.error("agent", `JSON was not correct - error: ${err}` )
         return { syntaxCheckMessage: `The following string does not represent a correct JSON, please correct it. ${state["outputString"]}` }
     }
     return { syntaxCheckMessage: `OK`, outputStructure: JSON.parse(state["outputString"]) }
@@ -137,10 +137,10 @@ async function isSyntaxOK(state) {
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
     .addNode("syntaxCheck", syntaxCheckNode)
-    //.addNode("critiqueNode", critiqueNode)
+    .addNode("critiqueNode", critiqueNode)
     .addEdge(START, "plannerNode")
     .addEdge("plannerNode", "syntaxCheck")
     .addConditionalEdges("syntaxCheck", isSyntaxOK)
-    //.addConditionalEdges("critiqueNode", isCritiqueOK);
+    .addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };

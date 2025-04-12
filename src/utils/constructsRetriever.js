@@ -54,7 +54,7 @@ async function findConstructs(document) {
 
 function extractPythonMainBlock(document) {
 	const code = document.getText();
-	const regex = /if\s+__name__\s*==\s*["']__main__["']:(\n(?:\s+.+\n?)*)/;
+	const regex = /if\s+__name__\s*==\s*["']__main__["']:\n((?:[ \t]+(?:.*)?\n?)*)/;
 	const match = code.match(regex);
 
 	return match ? match[0] : null;

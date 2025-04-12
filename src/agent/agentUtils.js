@@ -1,20 +1,30 @@
-const PLANNING_SYSTEM_PROMPT = `You are provided with a piece of code. Your task is to analyze it and split it into multiple clusters, where each cluster represents a group of code snippets that are highly related in functionality, logic, or purpose.
-return a list of dictionaries, where the list follows this structure:
+const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's mental state (in form of user preferences).
+
+Your task is to:
+1. Analyze the code.
+2. Split it into multiple **clusters**, where each cluster represents a group of lines that share a clear and related purpose (e.g., function body, if block, loop, single-line statement with a distinct purpose).
+3. For each cluster, return a dictionary with the following structure:
+
+
 {{
-    "text": "code snippet in a string format",
-    "description": "description (max 3 lines of text in which you describe in natural language what the cluster of code does)"
+    "text": "code snippet as-is, preserving the original formatting and indentation",
+    "description": "a natural language explanation of what this cluster does written following the user mental state"
 }}
 
-You should avoid writing obvious descriptions, such as "function declaration".
+Output a **list of these dictionaries**, preserving the original order of the code.
+When writing the description you must **ALWAYS** consider the user mental state
 **NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.**
 
-In the description when you end a sentence, you must add the escape \n
-    •	A cluster can be a multi-line block of code or a single line of code if it has a distinct function or purpose.
-    •	Examples of clusters are: if body, functions, else body, classes, for loops body... 
-    •	The code must be divided into multiple clusters, not just a single one. Generate as many clusters as possible.
-    •	Do not change the order of the code. The clusters must be extracted while preserving the original sequence in which the code was written.
-    •	Do not include any introductory text or explanations—only return the structured list.
-    •	Do not include \`\`\`json or any useless text, I must parse your output with a formatter so don't add useless text.`;
+**Important rules**:
+- **Always consider the User's mental state** when writing the description (e.g., experience level, learning goal, tone preference).
+- **NEVER** change the number of spaces or indentation in the "text" field. The formatting must remain exactly as in the original code.
+- Each cluster must represent a meaningful, self-contained unit of logic.
+- The output **must contain multiple clusters** — do not return a single block of code.
+- Maintain the **original code sequence**; do not reorder the clusters.
+- Do **not** include any introductory or explanatory text.
+- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.
+
+Your output should be a clean JSON array of dictionaries, ready for automatic parsing.`;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
 {{
@@ -22,12 +32,25 @@ const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
     "description": "description (max 3 lines of text in which there is a description in natural language what the code does)"
 }}
 
-Your task is to verify that the description is actually Correct.
-If it is not correct you must respond with "NOT OK" and provide a suggestion.
-If the description is correct you must respond **ONLY** with "OK".
-Do not add any introductive text.`;
+Your task is to evaluate whether the description is:
+1. **Semantically correct** — it accurately reflects what the code actually does.
+2. **Clear and concise** — it is understandable and reasonably brief.
+3. **Complete enough** — it does not omit key operations or introduce inaccuracies.
 
-function doubleBraces(input) {
+Respond as follows:
+- If the description is correct, complete, and clear, reply with **only**: OK  
+- If the description is incorrect, incomplete, or misleading in any way, reply with: NOT OK 
+and then, provide a revised version of the description.
+
+Do not include any introductory or explanatory text.
+Focus only on the correctness and quality of the description.`;
+
+/**
+ * Escapes all curly braces in a string by doubling them.
+ * @param {string} input - The input string containing curly braces.
+ * @returns {string} - The string with all `{` and `}` doubled (i.e., escaped).
+ */
+function escapeCurlyBraces(input) {
     return input.replace(/[\{\}]/g, match => match + match);
 }
 
@@ -56,7 +79,7 @@ function cleanLLMAnswer(LLMAnswer, programmingLanguage = "") {
 module.exports = {
     PLANNING_SYSTEM_PROMPT,
     CRITIQUE_SYSTEM_PROMPT,
-    doubleBraces,
+    doubleBraces: escapeCurlyBraces,
     cleanLLMAnswer
 }
 
