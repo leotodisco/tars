@@ -8,7 +8,7 @@ const {
 	normalizeOutputStructure,
 	decorateExplanation
 } = require('../utils/extensionUtils');
-const { runTomQuiz } = require("./tomQuiz.js")
+const { runTomQuiz } = require("./tomCommand.js")
 
 /**
  * Analyzes the active code editor and generates contextual explanations for 

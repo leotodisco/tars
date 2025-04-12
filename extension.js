@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const { explainCodeCommand } = require('./src/commands/explainCodeCommand')
-const { runTomQuiz, flushUserMind, showUserMentalState } = require("./src/commands/tomQuiz.js")
+const { runTomQuiz, flushUserMind, showUserMentalState } = require("./src/commands/tomCommand.js")
 
 /**
  * @param {vscode.ExtensionContext} context
