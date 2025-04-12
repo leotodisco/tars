@@ -1,65 +1,113 @@
-# tars README
+# 🧠 TARS — Intelligent Code Explanations for VS Code
 
-This is the README for your extension "tars". After writing up a brief description, we recommend including the following sections.
+**TARS** is a Visual Studio Code extension that provides real-time, developer-personalized explanations of your code, powered by **LLM Agents** built with [LangGraph](https://www.langgraph.dev/).
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+It integrates cutting-edge concepts like **Self-Refinement**, **Theory of Mind**, and **Perspective Taking**, allowing you to receive **accurate, personalized, and visually contextualized explanations** — either locally for full privacy or via API-powered cloud models.
 
 ---
 
-## Working with Markdown
+## ✨ Features
 
-You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+- ⚙️ **Real-Time Code Explanation**  
+  Automatically analyzes and explains functions, classes, and logical blocks in natural language.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets
+- 🧠 **Theory of Mind + Perspective Taking**  
+  TARS adapts its explanations to your **experience level, goals, and preferences**. This includes a form of **Perspective Taking**, where the agent reasons based on your mental profile to communicate effectively.
 
-## For more information
+- 🔁 **Self-Refinement Mechanism**  
+  Before giving you an answer, the agent refines its own output using LangGraph’s stateful multi-step reasoning.
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+- 🖼️ **Visual Inline Explanations**  
+  Explanations appear next to the code as editor decorations, making them intuitive and non-intrusive.
 
-**Enjoy!**
+- 🔐 **Local or Cloud Execution**  
+  Choose privacy or performance: run locally with [Ollama](https://ollama.ai), or use OpenAI / DeepSeek for broader LLM access.
+
+---
+
+## 🤖 Supported LLM Providers
+
+1. **Ollama** (local — fully private)
+2. **OpenAI** (via API key)
+3. **DeepSeek** (via API key)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Install the Extension
+
+```bash
+git clone https://github.com/your-username/tars-vscode-extension.git
+cd tars-vscode-extension
+npm install
+npm run compile
+```
+
+Then press `F5` in VS Code to launch the Extension Development Host.
+
+---
+
+### 2. Configure Environment Variables
+
+Create a `.env` file in the root (or specify a path) and add:
+
+```env
+OPENAI_API_KEY=your_openai_key_here
+DEEPSEEK_API_KEY=your_deepseek_key_here
+```
+
+For **Ollama**, make sure the local server is running.
+
+---
+
+### 3. Run Required Commands
+
+To get started with TARS, run the following commands:
+
+#### ✅ Main Commands
+
+- `TARS: Theory Of Mind Profiler`  
+  → Starts a short quiz to personalize explanations based on your mental model.
+
+- `TARS: Explain Code`  
+  → Analyzes and explains the selected code based on your profile.
+
+#### 🔧 Utility Commands
+
+- `TARS: Flush Tars State`  
+  → Clears all stored user profiling (useful to re-run the quiz or reset state).
+
+- `TARS: Log User Mind`  
+  → Logs the current profiling data to the console (for debugging).
+
+---
+
+## 🧠 What is Theory of Mind + Perspective Taking?
+
+TARS uses a **Theory of Mind (ToM)** mechanism to model you as a user:  
+Your experience level, learning goals, preferred tone, and more are captured through an initial quiz.  
+Then, using **Perspective Taking**, the LLM adjusts its explanations as if it were reasoning from your point of view — just like a good teacher would.
+
+---
+
+## 🏗️ Architecture Overview
+
+- 🔍 **Code Construct Parser** — Extracts functions, classes, and logical blocks using VS Code Symbol API.  
+- 🔄 **LangGraph Agent** — Powers the self-refining loop and perspective-aware reasoning.  
+- 🧠 **ToM Profiler** — Captures your mental state and injects it into agent prompts.  
+- 🎯 **Decorator Engine** — Renders inline visual explanations as you code.
+
+---
+
+
+## 📄 License
+
+MIT © 2025 — Created by [Leopoldo Todisco](https://github.com/leotodisco)
+
+---
+
+## 🤝 Contributing
+
+Pull requests, suggestions, and contributions are welcome.  
+Feel free to open issues to propose ideas or report bugs!
