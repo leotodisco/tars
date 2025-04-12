@@ -1,6 +1,6 @@
 const vscode = require('vscode');
 const { explainCodeCommand } = require('./src/commands/explainCodeCommand')
-const { runTomQuiz, flushUserMind } = require("./src/tom/tomQuiz.js")
+const { runTomQuiz, flushUserMind, showUserMentalState } = require("./src/commands/tomQuiz.js")
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -9,7 +9,8 @@ function activate(context) {
 	const commands = [
 		{ name: 'tars.explain-code', callback: () => explainCodeCommand(context) },
 		{ name: 'tars.flush', callback: () => flushUserMind(context) },
-		{ name: 'tars.tom', callback: () => runTomQuiz(context) }
+		{ name: 'tars.tom', callback: () => runTomQuiz(context) },
+		{ name: 'tars.logUserMind', callback: () => showUserMentalState(context) }
 	];
 
 	commands.forEach(({ name, callback }) => {

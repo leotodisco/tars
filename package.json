@@ -25,6 +25,10 @@
       {
         "command": "tars.tom",
         "title": "Theory Of Mind Profiler"
+      },
+      {
+        "command": "tars.logUserMind",
+        "title": "Log User Mind"
       }
     ]
   },

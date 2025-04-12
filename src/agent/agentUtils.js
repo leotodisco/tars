@@ -19,6 +19,7 @@ When writing the description you must **ALWAYS** consider the user mental state
 - **Always consider the User's mental state** when writing the description (e.g., experience level, learning goal, tone preference).
 - **NEVER** change the number of spaces or indentation in the "text" field. The formatting must remain exactly as in the original code.
 - Each cluster must represent a meaningful, self-contained unit of logic.
+- The "text" section should never start with "\n" or spaces because it breaks the parser.
 - The output **must contain multiple clusters** — do not return a single block of code.
 - Maintain the **original code sequence**; do not reorder the clusters.
 - Do **not** include any introductory or explanatory text.

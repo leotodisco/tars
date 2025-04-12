@@ -8,7 +8,7 @@ const {
 	normalizeOutputStructure,
 	decorateExplanation
 } = require('../utils/extensionUtils');
-const { runTomQuiz } = require("../tom/tomQuiz.js")
+const { runTomQuiz } = require("./tomQuiz.js")
 
 /**
  * Analyzes the active code editor and generates contextual explanations for 
@@ -31,14 +31,14 @@ async function explainCodeCommand(context) {
 	}
     // builds the user mental state string
 	const userMindString = [
-		`programming experience: ${userMind[0]["answer"]}`,
-		`role: ${userMind[1]["answer"]}`,
-		`The user is using this LLM: ${userMind[2]["answer"]}`,
-		`The user wants the explanation that are: ${userMind[3]["answer"]}`,
-		`The user is very confident in: ${userMind[4]["answer"]}`,
-		`The goal of the user is to: ${userMind[5]["answer"]}`,
-		`Use the following tone: ${userMind[6]["answer"]}`
-	].join(" ");
+		`- programming experience: ${userMind[0]["answer"]}`,
+		`- role: ${userMind[1]["answer"]}`,
+		`- The user is using this LLM: ${userMind[2]["answer"]}`,
+		`- The user wants the explanation that are: ${userMind[3]["answer"]}`,
+		`- The user is very confident in: ${userMind[4]["answer"]}`,
+		`- The goal of the user is to: ${userMind[5]["answer"]}`,
+		`- Use the following tone: ${userMind[6]["answer"]}`
+	].join("\n");
 
 	// Find code constructs using vsCode parser
 	const constructs = await findConstructs(document);

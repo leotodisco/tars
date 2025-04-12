@@ -123,8 +123,28 @@ function flushUserMind(context) {
 	context.globalState.update("userMind", null)
 }
 
+/**
+ * @param {vscode.ExtensionContext} context
+ */
+function showUserMentalState(context) {
+	let userMind = context.globalState.get('userMind');
+    // builds the user mental state string
+	const userMindString = [
+		`- programming experience: ${userMind[0]["answer"]}`,
+		`- role: ${userMind[1]["answer"]}`,
+		`- The user is using this LLM: ${userMind[2]["answer"]}`,
+		`- The user wants the explanation that are: ${userMind[3]["answer"]}`,
+		`- The user is very confident in: ${userMind[4]["answer"]}`,
+		`- The goal of the user is to: ${userMind[5]["answer"]}`,
+		`- Use the following tone: ${userMind[6]["answer"]}`
+	].join("\n");
+	
+	vscode.window.showInformationMessage(userMindString)
+}
+
 module.exports = {
 	runTomQuiz,
 	getSavedAnswers,
-	flushUserMind
+	flushUserMind,
+	showUserMentalState
 };
