@@ -55,9 +55,10 @@ async function explainCodeCommand(context) {
     // invoke agent for each construct found
 	for (const construct of targets) {
 		const agentResponse = await agentInstance.invoke({
-			modelName: "qwen2.5-coder:3b",
+			modelName: "gpt-4o-mini",
+			//modelName: "qwen2.5-coder:3b",
 			inputCode: construct.sourceCode,
-			llmType: LLMType.OLLAMA,
+			llmType: LLMType.OPENAI,
 			maxAttempts: 3,
 			userProfile: userMindString
 		});
