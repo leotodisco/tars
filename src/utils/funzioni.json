@@ -1,0 +1,34 @@
+{
+  "recognize_whisper_api": {
+    "code": "def recognize_whisper_api(\n    recognizer,\n    audio_data: \"AudioData\",\n    *,\n    model: str = \"whisper-1\",\n    api_key: str | None = None,\n):\n    \"\"\"\n    Performs speech recognition on ``audio_data`` (an ``AudioData`` instance), using the OpenAI Whisper API.\n\n    This function requires an OpenAI account; visit https://platform.openai.com/signup, then generate API Key in `User settings <https://platform.openai.com/account/api-keys>`__.\n\n    Detail: https://platform.openai.com/docs/guides/speech-to-text\n\n    Raises a ``speech_recognition.exceptions.SetupError`` exception if there are any issues with the openai installation, or the environment variable is missing.\n    \"\"\"\n    if not isinstance(audio_data, AudioData):\n        raise ValueError(\"``audio_data`` must be an ``AudioData`` instance\")\n    if api_key is None and os.environ.get(\"OPENAI_API_KEY\") is None:\n        raise SetupError(\"Set environment variable ``OPENAI_API_KEY``\")\n\n    try:\n        import openai\n    except ImportError:\n        raise SetupError(\n            \"missing openai module: ensure that openai is set up correctly.\"\n        )\n\n    wav_data = BytesIO(audio_data.get_wav_data())\n    wav_data.name = \"SpeechRecognition_audio.wav\"\n\n    transcript = openai.Audio.transcribe(model, wav_data, api_key=api_key)\n    return transcript[\"text\"]",
+    "filePath": "whisper.py"
+  },
+  "write_to_txt": {
+    "code": "def write_to_txt(result, output_path):\n    max_words_per_line = 16\n\n    with open(output_path, 'w', encoding='utf-8') as file:\n        words = result.split()\n        for i in range(0, len(words), max_words_per_line):\n            line = ' '.join(words[i:i + max_words_per_line])\n            file.write(line + '\\n')",
+    "filePath": "transcriber_facade.py"
+  },
+  "do_transcribe": {
+    "code": "def do_transcribe(model, path, lang):\n    print(\"trascrivo...\")\n    \n    result = model.transcribe(path, language=lang)\n    result_path = \"trascrizione.txt\"\n    write_to_txt(result[\"text\"], result_path)",
+    "filePath": "transcriber_facade.py"
+  },
+  "create_model": {
+    "code": "def create_model(size, lang):\n    model = whisper.load_model(size)\n    return model",
+    "filePath": "transcriber_facade.py"
+  },
+  "crea_nome_file": {
+    "code": "def crea_nome_file(percorso):\n    parti_nome_file = percorso.split(sep='.')\n    path_finale = \"./\"+parti_nome_file[1] + \"_tagliato.\" + parti_nome_file[2]\n    return path_finale",
+    "filePath": "audio_processing.py"
+  },
+  "taglia_audio": {
+    "code": "def taglia_audio(percorso:str, split_time:int):\n    print(\"tagliando audio...\")\n    inizio_taglio = split_time*1000  # secondi per 1000\n    audio = AudioSegment.from_file(percorso)\n    audio_tagliato = audio[inizio_taglio:]\n    \n    path_finale = crea_nome_file(percorso)\n    \n    audio_tagliato.export(path_finale, format=\"mp3\")\n    return path_finale",
+    "filePath": "audio_processing.py"
+  },
+  "convert_from_m4a_to_mp3": {
+    "code": "def convert_from_m4a_to_mp3(percorso:str):\n    print(\"converto audio...\")\n    audio = AudioSegment.from_file(percorso, format=\"m4a\")\n    mp3_path = \"audio/\" + percorso.split(sep='.')[1] + \".mp3\"\n    audio.export(mp3_path, format=\"mp3\")\n    \n    return",
+    "filePath": "audio_processing.py"
+  },
+  "resample_to_16khz": {
+    "code": "def resample_to_16khz(path: str):\n    audio = AudioSegment.from_file(path, format=\"aac\")\n    audio = audio.set_frame_rate(16000)\n    \n    mp3_path = path.split(sep='.')[1] + \".wav\"\n    audio.export(mp3_path, format=\"wav\")\n    return mp3_path",
+    "filePath": "audio_processing.py"
+  }
+}

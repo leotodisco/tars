@@ -15,11 +15,9 @@ const LLMFactory = {
                     model: modelName,
                     temperature: 0
                 });
-                logger.info("agent", "Created Ollama Model");
                 break;
 
             case LLMType.OPENAI:
-                logger.info("agent", "Created OpenAI Model");
                 llm = new ChatOpenAI({
                     apiKey: process.env.OPENAI_API_KEY,
                     model: modelName,
@@ -30,7 +28,6 @@ const LLMFactory = {
                 break;
 
             case LLMType.DEEPSEEK:
-                logger.info("agent", "Created DeepSeek Model");
                 llm = new ChatOpenAI({
                     model: modelName,
                     temperature: 0,

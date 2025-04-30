@@ -3,15 +3,26 @@ const { StateGraph } = require("@langchain/langgraph");
 const { ChatPromptTemplate } = require("@langchain/core/prompts");
 const { LLMFactory } = require("./llmFactory");
 const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils.js");
-const { doubleBraces, cleanLLMAnswer } = require("./agentUtils.js")
+const { doubleBraces, cleanLLMAnswer, formatTemplate, extractUsedConstructs } = require("./agentUtils.js")
 const { agentState } = require("./agentState.js")
 const { logger } = require("../utils/logger")
 
 async function planner(state) {
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
+    const importedConstructsCode = extractUsedConstructs(state["inputCode"], state["importedConstructs"])
     logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN
     if (state["syntaxCheckMessage"] === undefined) {
+        const userInput = `
+            ## User mental state: 
+            ${state["userProfile"]}
+
+            ## Imported Code: 
+            ${doubleBraces(importedConstructsCode)}
+
+            ## Source code That you will describe: 
+            ${doubleBraces(state["inputCode"])}`;
+
         var prompt = ChatPromptTemplate.fromMessages([
             [
                 "system",
@@ -19,7 +30,7 @@ async function planner(state) {
             ],
             [
                 "user",
-                state["userProfile"] + doubleBraces(" DO NOT ADD ```json in the response. Respond only with the list of dictionaries because I will Parse it. \nSource code: " + state["inputCode"])
+                userInput
             ],
         ]);
 
@@ -58,8 +69,16 @@ async function planner(state) {
         state["currentAttemptNumber"] = state["currentAttemptNumber"] + 1;
     }
 
-    const chain = prompt.pipe(llm);
-    let response = await chain.invoke();
+    let response;
+
+    try {
+        const chain = prompt.pipe(llm);
+        response = await chain.invoke();
+    } catch (error) {
+        console.error("Errore durante l'invocazione della catena LLM:");
+        console.error("Dettagli dell'errore:", error);
+        return;
+    }
     let responseString = response["content"]
     responseString = cleanLLMAnswer(responseString)
 
@@ -121,7 +140,6 @@ async function isCritiqueOK(state) {
 }
 
 async function isSyntaxOK(state) {
-    logger.info("agent", `attempt n ${state["currentAttemptNumber"]} `)
     if (state["syntaxCheckMessage"] === "OK") {
         //return "critiqueNode";
         return END;

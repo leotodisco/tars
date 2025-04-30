@@ -2,7 +2,7 @@ const { LLMType } = require("../agent/agentState.js")
 const vscode = require('vscode');
 const { agent } = require("../agent/agent");
 const fs = require('fs'); // Use this to print image later
-const { findConstructs } = require("../utils/constructsRetriever")
+const { findConstructs, extractImportedConstructs } = require("../utils/constructsRetriever")
 const { findMatches } = require("../utils/stringUtils")
 const {
 	normalizeOutputStructure,
@@ -52,17 +52,29 @@ async function explainCodeCommand(context) {
 		range: new vscode.Range(0, 0, document.lineCount, 0) // fallback range
 	}];
 
+
+	// find functions/classes/methods from other files that are imported in the current file
+	const importedConstructs = await extractImportedConstructs(document)
+
     // invoke agent for each construct found
 	for (const construct of targets) {
-		const agentResponse = await agentInstance.invoke({
-			modelName: "gpt-4o-mini",
-			//modelName: "qwen2.5-coder:3b",
-			inputCode: construct.sourceCode,
-			llmType: LLMType.OPENAI,
-			maxAttempts: 3,
-			userProfile: userMindString
-		});
-
+		let agentResponse;
+		try {
+			agentResponse = await agentInstance.invoke({
+				modelName: "gpt-4o-mini",
+				// modelName: "qwen2.5-coder:3b",
+				inputCode: construct.sourceCode,
+				llmType: LLMType.OPENAI,
+				maxAttempts: 3,
+				userProfile: userMindString,
+				importedConstructs: importedConstructs
+			});
+		} catch (error) {
+			//console.error("Errore durante l'invocazione dell'agente:", error);
+			console.error("Errore durante l'invocazione dell'agente:", construct.sourceCode);
+			vscode.window.showErrorMessage("Si è verificato un errore durante la generazione con il modello.");
+			return; // oppure gestisci come preferisci
+		}
 		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 		let elementIndex = 0;
 
