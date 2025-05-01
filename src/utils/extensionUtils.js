@@ -107,8 +107,8 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     }
 
     const borderColor = elementIndex % 2 === 0
-        ? "rgba(132, 205, 225, 0.92)"
-        : "rgba(12, 245, 12, 0.92)";
+    ? "rgb(255, 255, 112)"     // Giallo brillante
+    : "rgba(128, 0, 255, 1)";    // Viola acceso
 
     const decorations = explanationLines
         .slice(0, endLine - startLine + 1)
