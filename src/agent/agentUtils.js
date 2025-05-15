@@ -43,6 +43,7 @@ and then, provide a revised version of the description.
 Do not include any introductory or explanatory text.
 Focus only on the correctness and quality of the description.`;
 
+
 /**
  * Escapes all curly braces in a string by doubling them.
  * @param {string} input - The input string containing curly braces.
@@ -74,10 +75,31 @@ function cleanLLMAnswer(LLMAnswer, programmingLanguage = "") {
     return responseString
 }
 
+function formatTemplate(template, values) {
+    return template.replace(/\{(\w+)\}/g, (match, key) => {
+        return key in values ? values[key] : match;
+    });
+}
+
+function extractUsedConstructs(inputCode, importedConstructs) {
+    const usedCodes = [];
+
+    for (const [funcName, data] of Object.entries(importedConstructs)) {
+        const regex = new RegExp(`\\b${funcName}\\b`, 'g');
+        if (regex.test(inputCode)) {
+            usedCodes.push(data.code);
+        }
+    }
+
+    return usedCodes.join("\n\n");
+}
+
 module.exports = {
     PLANNING_SYSTEM_PROMPT,
     CRITIQUE_SYSTEM_PROMPT,
     doubleBraces: escapeCurlyBraces,
-    cleanLLMAnswer
+    cleanLLMAnswer,
+    formatTemplate,
+    extractUsedConstructs
 }
 
