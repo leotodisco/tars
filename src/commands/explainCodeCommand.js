@@ -9,6 +9,7 @@ const {
 	decorateExplanation
 } = require('../utils/extensionUtils');
 const { runTomQuiz } = require("./tomCommand.js")
+const { configureTars } = require("./configureTarsCommand.js")
 
 /**
  * Analyzes the active code editor and generates contextual explanations for 
@@ -23,13 +24,26 @@ async function explainCodeCommand(context) {
 	const document = editor.document;
 	const agentInstance = agent.compile();
 
+	// Retrieve tars configuration (LLM Name and APIs)
+	let config = context.globalState.get('tarsConfiguration');
+	if (!config) {
+		await configureTars(context);
+		config = context.globalState.get('tarsConfiguration');
+	}
+
+	console.log("###")
+	console.log(config)
+	const llmName = config[0]["answer"]
+	const llmType = config[1]["answer"]
+	const llmAPI = config[2]["answer"]
+
 	// Retrieve user profile (Theory Of Mind stuff)
 	let userMind = context.globalState.get('userMind');
 	if (!userMind) {
 		await runTomQuiz(context);
 		userMind = context.globalState.get('userMind');
 	}
-    // builds the user mental state string
+	// builds the user mental state string
 	const userMindString = [
 		`- programming experience: ${userMind[0]["answer"]}`,
 		`- role: ${userMind[1]["answer"]}`,
@@ -46,21 +60,21 @@ async function explainCodeCommand(context) {
 		c.type === "Method" || c.type === "Function" || c.type === "Class"
 	);
 
-    // if there are no classes/methods/functions uses the entire code in the document for the agent execution
+	// if there are no classes/methods/functions uses the entire code in the document for the agent execution
 	const targets = isConstructBased ? constructs : [{
 		sourceCode: document.getText(),
 		range: new vscode.Range(0, 0, document.lineCount, 0) // fallback range
 	}];
 
-    // invoke agent for each construct found
+	// invoke agent for each construct found
 	for (const construct of targets) {
 		const agentResponse = await agentInstance.invoke({
-			modelName: "gpt-4o-mini",
-			//modelName: "qwen2.5-coder:3b",
+			modelName: llmName,
 			inputCode: construct.sourceCode,
-			llmType: LLMType.OPENAI,
+			llmType: llmType === "api" ? LLMType.OPENAI : LLMType.OLLAMA,
 			maxAttempts: 3,
-			userProfile: userMindString
+			userProfile: userMindString,
+			llmAPI: llmAPI
 		});
 
 		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);

@@ -11,7 +11,8 @@ const agentState = Annotation.Root({
     modelName: Annotation(),
     llmType: Annotation(),
     maxAttempts: Annotation(),
-    currentAttemptNumber: Annotation()
+    currentAttemptNumber: Annotation(),
+    llmAPI: Annotation()
 });
 
 class LLMType {
