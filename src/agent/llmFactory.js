@@ -2,10 +2,9 @@ const { ChatOllama } = require("@langchain/ollama");
 const { ChatOpenAI } = require("@langchain/OpenAI");
 const { logger } = require("../utils/logger");
 const { LLMType } = require("./agentState");
-require('dotenv').config({'path': "/Users/leopoldotodisco/Desktop/MasterThesis/tars/src/.env"});
 
 const LLMFactory = {
-    createLLM: function (llmType, modelName) {
+    createLLM: function (llmType, modelName, apiKey) {
         let llm;
 
         switch (llmType) {
@@ -19,7 +18,7 @@ const LLMFactory = {
 
             case LLMType.OPENAI:
                 llm = new ChatOpenAI({
-                    apiKey: process.env.OPENAI_API_KEY,
+                    apiKey: apiKey,
                     model: modelName,
                     temperature: 0,
                     maxTokens: 4000,

@@ -8,7 +8,7 @@ const { agentState } = require("./agentState.js")
 const { logger } = require("../utils/logger")
 
 async function planner(state) {
-    let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
+    let llm = LLMFactory.createLLM(state["llmType"], state["modelName"], state["llmAPI"]);
     const importedConstructsCode = extractUsedConstructs(state["inputCode"], state["importedConstructs"])
     logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN

@@ -15,6 +15,18 @@
   "contributes": {
     "commands": [
       {
+        "command": "tars.show-tars-config",
+        "title": "Show Tars Config"
+      },
+      {
+        "command": "tars.configure-tars",
+        "title": "Configure Tars"
+      },
+      {
+        "command": "tars.flush-tars-config",
+        "title": "Flush Tars Config"
+      },
+      {
         "command": "tars.explain-code",
         "title": "Explain Code"
       },
