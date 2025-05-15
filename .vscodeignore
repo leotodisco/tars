@@ -8,6 +8,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/eslint.config.mjs
 **/.vscode-test.*
-
 *.png
 *.env
