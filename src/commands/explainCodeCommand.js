@@ -71,17 +71,17 @@ async function explainCodeCommand(context) {
 	// find functions/classes/methods from other files that are imported in the current file
 	const importedConstructs = await extractImportedConstructs(document)
 
-    // invoke agent for each construct found
+	// invoke agent for each construct found
 	for (const construct of targets) {
 		let agentResponse;
 		try {
 			agentResponse = await agentInstance.invoke({
-			modelName: llmName,
-			inputCode: construct.sourceCode,
-			llmType: llmType === "api" ? LLMType.OPENAI : LLMType.OLLAMA,
-			maxAttempts: 3,
-			userProfile: userMindString,
-			llmAPI: llmAPI
+				modelName: llmName,
+				inputCode: construct.sourceCode,
+				llmType: llmType === "api" ? LLMType.OPENAI : LLMType.OLLAMA,
+				maxAttempts: 3,
+				userProfile: userMindString,
+				llmAPI: llmAPI,
 				importedConstructs: importedConstructs
 			});
 		} catch (error) {
