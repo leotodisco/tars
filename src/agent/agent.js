@@ -56,6 +56,7 @@ async function planner(state) {
     // CASO IN CUI ABBIAMO UNA CRITICA
     else if (state["critique"] !== "OK") {
         logger.warn("agent", "critique found.")
+        logger.warn("agent", `${state["critique"]}`)
         var prompt = ChatPromptTemplate.fromMessages([
             [
                 "system",
@@ -116,8 +117,7 @@ async function critiqueNode(state) {
 
     const chain = prompt.pipe(llm);
     let response = await chain.invoke();
-
-    let critiqueResponseString = response.toString()
+    let critiqueResponseString = response["content"]
     critiqueResponseString = cleanLLMAnswer(critiqueResponseString)
     console.log("critique response = ", critiqueResponseString)
 

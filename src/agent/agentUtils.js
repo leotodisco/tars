@@ -2,7 +2,7 @@ const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's men
 
 Your task is to:
 1. Analyze the code.
-2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that share a clear and related purpose (e.g., function body, if block, loop, single-line statement with a distinct purpose).
+2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., function body, if block, loop, single-line statement with a completely distinct purpose).
  Each cluster must represent a meaningful, self-contained unit of logic.
 3. For each cluster, return a dictionary with the following structure:
 
@@ -30,10 +30,7 @@ const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
     "description": "description (max 3 lines of text in which there is a description in natural language what the code does)"
 }}
 
-Your task is to evaluate whether the description is:
-1. **Semantically correct** — it accurately reflects what the code actually does.
-2. **Clear and concise** — it is understandable and reasonably brief.
-3. **Complete enough** — it does not omit key operations or introduce inaccuracies.
+Your task is to evaluate whether the description is **Semantically correct** — it accurately reflects what the code actually does.
 
 Respond as follows:
 - If the description is correct, complete, and clear, reply with **only**: OK  

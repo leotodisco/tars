@@ -28,7 +28,7 @@ function normalizeOutputStructure(outputStructure) {
 function splitExplanationText(text, sourceCode) {
     const words = text.split(" ");
     const nLines = (sourceCode.match(/\n/g) || []).length + 1;
-    const maxCharsPerLine = sourceCode.length/nLines
+    const maxCharsPerLine = text.length/nLines
     // maxCharsPerLine = 280 is the default
     let currentLine = "";
     const lines = [];
