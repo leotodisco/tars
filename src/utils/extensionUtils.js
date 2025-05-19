@@ -22,11 +22,14 @@ function normalizeOutputStructure(outputStructure) {
  * Words are preserved and not broken across lines.
  *
  * @param {string} text - The explanation text to split.
- * @param {number} maxCharsPerLine - Maximum number of characters allowed per line (default: 280).
+ * @param {string} sourceCode - The source code related to the explanation.
  * @returns {string[]} - An array of text lines.
  */
-function splitExplanationText(text, maxCharsPerLine = 280) {
+function splitExplanationText(text, sourceCode) {
     const words = text.split(" ");
+    const nLines = (sourceCode.match(/\n/g) || []).length + 1;
+    const maxCharsPerLine = sourceCode.length/nLines
+    // maxCharsPerLine = 280 is the default
     let currentLine = "";
     const lines = [];
 
@@ -99,7 +102,7 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     const endLine = range.end.line;
 
     const explanation = element["description"];
-    let explanationLines = splitExplanationText(explanation);
+    let explanationLines = splitExplanationText(explanation, element["text"]);
 
     // Pad with empty lines if the explanation is shorter than the code block
     while (explanationLines.length < endLine - startLine + 1) {

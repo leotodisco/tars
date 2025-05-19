@@ -51,7 +51,6 @@ async function initializeOllamaModel(modelName) {
         const tagsRes = await fetch('http://localhost:11434/api/tags');
         const tagsJson = await tagsRes.json();
         const availableModels = tagsJson.models.map((m) => m.name);
-        vscode.window.showInformationMessage(`Available Models: ${availableModels.join(", ")}`);
 
         if (!availableModels.includes(modelName)) {
             vscode.window.showInformationMessage(`Pulling Ollama model: ${modelName}\n It may require some time.`);

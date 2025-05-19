@@ -85,7 +85,6 @@ async function explainCodeCommand(context) {
 			});
 		} catch (error) {
 			console.error("Errore durante l'invocazione dell'agente:", error);
-			return;
 		}
 		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 		let elementIndex = 0;
