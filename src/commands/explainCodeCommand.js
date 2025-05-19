@@ -66,12 +66,11 @@ async function explainCodeCommand(context) {
 		range: new vscode.Range(0, 0, document.lineCount, 0) // fallback range
 	}];
 
-
-
 	// find functions/classes/methods from other files that are imported in the current file
 	const importedConstructs = await extractImportedConstructs(document)
 
 	// invoke agent for each construct found
+	vscode.window.showInformationMessage("Starting Agent...")
 	for (const construct of targets) {
 		let agentResponse;
 		try {
@@ -85,10 +84,8 @@ async function explainCodeCommand(context) {
 				importedConstructs: importedConstructs
 			});
 		} catch (error) {
-			//console.error("Errore durante l'invocazione dell'agente:", error);
 			console.error("Errore durante l'invocazione dell'agente:", construct.sourceCode);
-			vscode.window.showErrorMessage("Si è verificato un errore durante la generazione con il modello.");
-			return; // oppure gestisci come preferisci
+			return;
 		}
 		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 		let elementIndex = 0;

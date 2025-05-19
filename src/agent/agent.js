@@ -6,6 +6,7 @@ const { PLANNING_SYSTEM_PROMPT, CRITIQUE_SYSTEM_PROMPT } = require("./agentUtils
 const { doubleBraces, cleanLLMAnswer, formatTemplate, extractUsedConstructs } = require("./agentUtils.js")
 const { agentState } = require("./agentState.js")
 const { logger } = require("../utils/logger")
+const vscode = require('vscode');
 
 async function planner(state) {
     let llm = LLMFactory.createLLM(state["llmType"], state["modelName"], state["llmAPI"]);
@@ -75,9 +76,8 @@ async function planner(state) {
         const chain = prompt.pipe(llm);
         response = await chain.invoke();
     } catch (error) {
-        console.error("Errore durante l'invocazione della catena LLM:");
-        console.error("Dettagli dell'errore:", error);
-        return;
+        vscode.window.showErrorMessage(`Error during Agent execution: ${error} `);
+        throw new Error(error.message);
     }
     let responseString = response["content"]
     responseString = cleanLLMAnswer(responseString)

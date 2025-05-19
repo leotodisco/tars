@@ -2,6 +2,7 @@ const { ChatOllama } = require("@langchain/ollama");
 const { ChatOpenAI } = require("@langchain/OpenAI");
 const { logger } = require("../utils/logger");
 const { LLMType } = require("./agentState");
+const vscode = require('vscode');
 
 const LLMFactory = {
     createLLM: function (llmType, modelName, apiKey) {
