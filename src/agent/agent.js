@@ -101,7 +101,7 @@ async function syntaxCheckNode(state) {
 }
 
 async function critiqueNode(state) {
-    let llm = await LLMFactory.createLLM(state["llmType"], state["modelName"]);
+    let llm = await LLMFactory.createLLM(state["llmType"], state["modelName"], state["llmAPI"]);
 
     const prompt = ChatPromptTemplate.fromMessages([
         [
@@ -129,7 +129,7 @@ async function critiqueNode(state) {
 }
 
 async function isCritiqueOK(state) {
-    if (state["critique"] === "OK" || state["critique"] === "\nOK") { // sistemare questa cosa
+    if (state["critique"] === "OK" || state["critique"] === "\nOK") {
         return END;
     }
     else
@@ -141,11 +141,12 @@ async function isCritiqueOK(state) {
 
 async function isSyntaxOK(state) {
     if (state["syntaxCheckMessage"] === "OK") {
-        //return "critiqueNode";
-        return END;
+        return "critiqueNode";
+        //return END;
     }
     else
         if (state["currentAttemptNumber"] > state["maxAttempts"]) {
+            vscode.window.showInformationMessage(`Can not provide explanations for ${state["inputCode"].slice(0, 30)}`)
             return END
         }
 
