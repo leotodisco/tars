@@ -146,15 +146,6 @@ async function extractImportedConstructs(document) {
 				console.warn(`Errore su: ${relPath}`, error);
 			}
 		}
-
-		// Ora puoi fare qualcosa con il JSON finale
-		const path = require('path');
-		const fs = require('fs');
-        console.log("### FUNZIONI TROVATE\n\n\n")
-        console.log(functionsMap)
-		const outputPath = path.join(__dirname, 'funzioni.json');
-		fs.writeFileSync(outputPath, JSON.stringify(functionsMap, null, 2));
-
         return functionsMap
 }
 

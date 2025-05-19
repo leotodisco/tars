@@ -32,7 +32,6 @@ function runTomQuiz(context) {
 	);
 }
 
-// Funzione per ottenere il contenuto HTML del quiz
 function getQuizHtml(webview, context) {
 	return `
 		<!DOCTYPE html>
@@ -45,6 +44,8 @@ function getQuizHtml(webview, context) {
 				body { font-family: Arial, sans-serif; padding: 20px; }
 				h2 { color: #007acc; }
 				button { padding: 10px 15px; margin-top: 10px; cursor: pointer; }
+				#saveButton { background-color: #007acc; color: white; margin-top: 30px; }
+				#confirmation { color: green; margin-top: 15px; display: none; font-weight: bold; }
 			</style>
 		</head>
 		<body>
@@ -89,11 +90,22 @@ function getQuizHtml(webview, context) {
 			<button onclick="sendAnswer('Professional', 'What tone do you prefer from the assistant?')">Professional</button>
 			<button onclick="sendAnswer('Neutral', 'What tone do you prefer from the assistant?')">Neutral</button>
 
+			<!-- Bottone di salvataggio -->
+			<div>
+				<button id="saveButton" onclick="saveQuiz()">Save State</button>
+				<div id="confirmation">User Mental State Saved!</div>
+			</div>
 
 			<script>
 				const vscode = acquireVsCodeApi();
+				
 				function sendAnswer(answer, question) {
 					vscode.postMessage({ type: "quizResponse", value: { question, answer } });
+				}
+
+				function saveQuiz() {
+					vscode.postMessage({ type: "quizComplete" });
+					document.getElementById("confirmation").style.display = "block";
 				}
 			</script>
 		</body>
