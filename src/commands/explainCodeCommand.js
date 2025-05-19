@@ -84,7 +84,7 @@ async function explainCodeCommand(context) {
 				importedConstructs: importedConstructs
 			});
 		} catch (error) {
-			console.error("Errore durante l'invocazione dell'agente:", construct.sourceCode);
+			console.error("Errore durante l'invocazione dell'agente:", error);
 			return;
 		}
 		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);

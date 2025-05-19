@@ -9,7 +9,7 @@ const { logger } = require("../utils/logger")
 const vscode = require('vscode');
 
 async function planner(state) {
-    let llm = LLMFactory.createLLM(state["llmType"], state["modelName"], state["llmAPI"]);
+    let llm = await LLMFactory.createLLM(state["llmType"], state["modelName"], state["llmAPI"]);
     const importedConstructsCode = extractUsedConstructs(state["inputCode"], state["importedConstructs"])
     logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN
@@ -101,7 +101,7 @@ async function syntaxCheckNode(state) {
 }
 
 async function critiqueNode(state) {
-    let llm = LLMFactory.createLLM(state["llmType"], state["modelName"]);
+    let llm = await LLMFactory.createLLM(state["llmType"], state["modelName"]);
 
     const prompt = ChatPromptTemplate.fromMessages([
         [
