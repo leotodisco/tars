@@ -37,35 +37,36 @@ It integrates cutting-edge concepts like **Self-Refinement**, **Theory of Mind**
 
 ### 1. Install the Extension
 
-```bash
-git clone https://github.com/your-username/tars-vscode-extension.git
-cd tars-vscode-extension
-npm install
-npm run compile
-```
+Open the VS Code command palette (`F1` or `Ctrl+Shift+P` on Windows/Linux, `Cmd+Shift+P` on macOS) and search for:
 
-Then press `F5` in VS Code to launch the Extension Development Host.
+> **`Extensions: Install from VSIX`**
+
+Then select the `.vsix` file provided in the **Releases** section of the repository.
+
+> ℹ️ The `.vsix` file is precompiled, so you don't need to run `npm install` or `npm run compile`.
 
 ---
 
-### 2. Configure Environment Variables
+### 2. Configure Tars
 
-Create a `.env` file in the root (or specify a path) and add:
+Open the **Command Palette** (`F1`, `Ctrl+Shift+P`, or `Cmd+Shift+P`) and run the command:
 
-```env
-OPENAI_API_KEY=your_openai_key_here
-DEEPSEEK_API_KEY=your_deepseek_key_here
-```
+> ⚙️ **`Configure Tars`**
 
+You will be prompted to provide the following information:
+
+1. **Select the backend**: Choose whether you want to use the **OpenAI API** or run a **local model** via **Ollama**.
+2. **Model configuration**: Enter the **model name** (e.g., `gpt-4`, `deepseek-coder`, `llama2`, etc.).
+3. **API Key (if using OpenAI)**: Provide your **OpenAI API key** when prompted.
+
+> 💡 You can rerun `Configure Tars` at any time to change these settings.
 For **Ollama**, make sure the local server is running.
 
 ---
 
-### 3. Run Required Commands
-
-To get started with TARS, run the following commands:
-
 #### ✅ Main Commands
+
+To actually use TARS, run the following commands:
 
 - `TARS: Theory Of Mind Profiler`  
   → Starts a short quiz to personalize explanations based on your mental model.
@@ -93,7 +94,7 @@ Then, using **Perspective Taking**, the LLM adjusts its explanations as if it we
 
 ## 🏗️ Architecture Overview
 
-- 🔍 **Code Construct Parser** — Extracts functions, classes, and logical blocks using VS Code Symbol API.  
+- 🔍 **Code Construct Parser** — Extracts functions, classes, and logical blocks using VS Code Symbol API. Also supports multi-file links in your codebase!
 - 🔄 **LangGraph Agent** — Powers the self-refining loop and perspective-aware reasoning.  
 - 🧠 **ToM Profiler** — Captures your mental state and injects it into agent prompts.  
 - 🎯 **Decorator Engine** — Renders inline visual explanations as you code.
