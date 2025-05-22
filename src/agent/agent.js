@@ -86,19 +86,40 @@ async function planner(state) {
     if (!responseString) {
         return { inputCode: state["inputCode"] };
     }
-    console.log(responseString)
+    console.log(`RESPONSE STRING = ${responseString}`)
     return { inputCode: state["inputCode"], outputString: responseString, currentAttemptNumber: state["currentAttemptNumber"] };
 }
 
 // voglio vedere se ciò che LLM ha generato è un JSON
 async function syntaxCheckNode(state) {
+    let parsed;
+
     try {
-        JSON.parse(state["outputString"])
+        parsed = JSON.parse(state["outputString"]);
+
+        if (Array.isArray(parsed)) {
+            parsed.forEach((item, index) => {
+                if (typeof item["text"] === "string") {
+                    parsed[index]["text"] = item["text"].trimStart();
+                }
+            });
+        } else {
+            logger.warn("agent", "Expected a list of JSON objects, got a single object.");
+            if (typeof parsed["text"] === "string") {
+                parsed["text"] = parsed["text"].trimStart();
+            }
+        }
     } catch (err) {
-        logger.error("agent", `JSON was not correct - error: ${err}`)
-        return { syntaxCheckMessage: `The following string does not represent a correct JSON, please correct it. ${state["outputString"]}` }
+        logger.error("agent", `JSON was not correct - error: ${err}`);
+        return {
+            syntaxCheckMessage: `The following string does not represent a correct JSON, please correct it. ${state["outputString"]}`
+        };
     }
-    return { syntaxCheckMessage: `OK`, outputStructure: JSON.parse(state["outputString"]) }
+
+    return {
+        syntaxCheckMessage: "OK",
+        outputStructure: parsed
+    };
 }
 
 async function critiqueNode(state) {
@@ -141,8 +162,8 @@ async function isCritiqueOK(state) {
 
 async function isSyntaxOK(state) {
     if (state["syntaxCheckMessage"] === "OK") {
-        return "critiqueNode";
-        //return END;
+        //return "critiqueNode";
+        return END;
     }
     else
         if (state["currentAttemptNumber"] > state["maxAttempts"]) {
@@ -156,10 +177,10 @@ async function isSyntaxOK(state) {
 const agent = new StateGraph(agentState)
     .addNode("plannerNode", planner)
     .addNode("syntaxCheck", syntaxCheckNode)
-    .addNode("critiqueNode", critiqueNode)
+    //.addNode("critiqueNode", critiqueNode)
     .addEdge(START, "plannerNode")
     .addEdge("plannerNode", "syntaxCheck")
     .addConditionalEdges("syntaxCheck", isSyntaxOK)
-    .addConditionalEdges("critiqueNode", isCritiqueOK);
+    //.addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };

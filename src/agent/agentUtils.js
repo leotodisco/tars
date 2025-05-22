@@ -22,7 +22,8 @@ When writing the description you must **ALWAYS** consider the user mental state
 - Maintain the **original code sequence**; do not reorder the clusters.
 - IMPORTANT: Do **not** provide line by line explanation, unless the user preferences claim so.
 - Do **not** include any introductory or explanatory text.
-- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.`;
+- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.
+- Do **not** add extra indent or spaces to the text key in the result.`;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
 {{

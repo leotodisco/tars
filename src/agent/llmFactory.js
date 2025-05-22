@@ -16,7 +16,7 @@ const LLMFactory = {
                     apiKey: apiKey,
                     model: modelName,
                     temperature: 0,
-                    maxTokens: 1000,
+                    maxTokens: 10000,
                     maxRetries: 5
                 });
 

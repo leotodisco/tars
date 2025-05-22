@@ -28,8 +28,8 @@ function normalizeOutputStructure(outputStructure) {
 function splitExplanationText(text, sourceCode) {
     const words = text.split(" ");
     const nLines = (sourceCode.match(/\n/g) || []).length + 1;
-    const maxCharsPerLine = text.length/nLines
-    // maxCharsPerLine = 280 is the default
+    //const maxCharsPerLine = text.length/nLines
+    const maxCharsPerLine = 280 // is the default
     let currentLine = "";
     const lines = [];
 
@@ -100,7 +100,6 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     const range = new vscode.Range(startPosition, endPosition);
     const startLine = range.start.line;
     const endLine = range.end.line;
-
     const explanation = element["description"];
     let explanationLines = splitExplanationText(explanation, element["text"]);
 
