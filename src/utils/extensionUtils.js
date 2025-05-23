@@ -69,16 +69,22 @@ function getMaxLineLength(document, startLine, endLine) {
  * @returns {vscode.TextEditorDecorationType} - The configured decoration type.
  */
 function createDecorationType(contentText, borderColor) {
+    const isDarkTheme =
+        vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ||
+        vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast;
+
+    const textColor = isDarkTheme ? 'white' : 'black'; // solo colore del testo
+
     return vscode.window.createTextEditorDecorationType({
-        isWholeLine: true, 
+        isWholeLine: true,
         after: {
             contentText: `  ${contentText}`,
-            color: "white",
+            color: textColor,
             fontWeight: "1200",
         },
         borderColor: borderColor,
         borderStyle: 'solid',
-        borderWidth: '0 0 0 1px', 
+        borderWidth: '0 0 0 1px',
     });
 }
 
@@ -111,7 +117,7 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     const borderColor = elementIndex % 2 === 0
     ? "rgb(255, 255, 112)"     // Giallo
     : "rgba(128, 0, 255, 1)";    // Viola
-
+    const themeColor = vscode.window.activeColorTheme.kind  
     const decorations = explanationLines
         .slice(0, endLine - startLine + 1)
         .map((text, i) => {
@@ -128,6 +134,8 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
         });
 
     decorations.forEach(({ type, range }) => {
+        // se tema è chiaro metti testo di colore
+        // se tema è scuro metti testo di colore chiaro
         editor.setDecorations(type, [range]);
     });
 }

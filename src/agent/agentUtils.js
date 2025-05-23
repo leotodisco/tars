@@ -2,7 +2,7 @@ const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's men
 
 Your task is to:
 1. Analyze the code.
-2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., function body, if block, loop, single-line statement with a completely distinct purpose).
+2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., function body, if block, else, else-if, except, try, loop, single-line statement with a completely distinct purpose).
  Each cluster must represent a meaningful, self-contained unit of logic.
 3. For each cluster, return a dictionary with the following structure:
 
@@ -10,6 +10,8 @@ Your task is to:
     "text": "cluster code snippet as-is, preserving the original formatting and indentation",
     "description": "a natural language explanation of what this cluster does written following the user mental state"
 }}
+
+- **If in the input code there is something that is not important/complex and the user claimed that he wants some minimal explanation, please respond only with "None" as value for the "description" field**
 
 Output a **list of these dictionaries**, preserving the original order of the code.
 When writing the description you must **ALWAYS** consider the user mental state
@@ -23,7 +25,8 @@ When writing the description you must **ALWAYS** consider the user mental state
 - IMPORTANT: Do **not** provide line by line explanation, unless the user preferences claim so.
 - Do **not** include any introductory or explanatory text.
 - Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.
-- Do **not** add extra indent or spaces to the text key in the result.`;
+- Do **not** add extra indent or spaces to the text key in the result.
+`;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
 {{
