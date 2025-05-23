@@ -96,6 +96,8 @@ async function explainCodeCommand(context) {
 				decorateExplanation(editor, document, element, elementIndex, matchText);
 			}
 		}
+
+		vscode.window.showInformationMessage("Tars completed explain code command");
 	}
 }
 
