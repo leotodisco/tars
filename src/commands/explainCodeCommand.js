@@ -91,18 +91,18 @@ async function explainCodeCommand(context) {
 
 		for (const element of outputList) {
 			elementIndex += 1;
-			const matchText = element["text"];			
+			const matchText = element["text"];
 
 			if (document.getText(construct.range).includes(matchText)) {
-				if(element["description"] === "None") {
-				console.log("--- None found\n")
-				continue;
-			}
+				if (element["description"] === "None") {
+					console.log("--- None found\n")
+					continue;
+				}
 				decorateExplanation(editor, document, element, elementIndex, matchText);
 			}
 		}
 
-		
+
 	}
 }
 

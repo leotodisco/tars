@@ -19,6 +19,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "tars.help-command",
+        "title": "Tars Help"
+      },
+      {
         "command": "tars.show-tars-config",
         "title": "Show Tars Config"
       },

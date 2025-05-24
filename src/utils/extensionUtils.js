@@ -115,9 +115,9 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     }
 
     const borderColor = elementIndex % 2 === 0
-    ? "rgb(255, 255, 112)"     // Giallo
-    : "rgba(128, 0, 255, 1)";    // Viola
-    const themeColor = vscode.window.activeColorTheme.kind  
+        ? "rgb(255, 255, 112)"     // Giallo
+        : "rgba(128, 0, 255, 1)";    // Viola
+    const themeColor = vscode.window.activeColorTheme.kind
     const decorations = explanationLines
         .slice(0, endLine - startLine + 1)
         .map((text, i) => {

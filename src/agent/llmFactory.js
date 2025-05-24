@@ -5,11 +5,6 @@ const { LLMType } = require("./agentState");
 const vscode = require('vscode');
 const fetch = require('node-fetch');
 
-
-
-
-
-
 const LLMFactory = {
     createLLM: async function (llmType, modelName, apiKey) {
         switch (llmType) {
@@ -71,7 +66,7 @@ async function initializeOllamaModel(modelName) {
             }
 
             vscode.window.showInformationMessage(`Model "${modelName}" successfully downloaded.`);
-        } 
+        }
 
         return new ChatOllama({
             baseUrl: "http://localhost:11434",
