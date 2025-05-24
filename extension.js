@@ -21,6 +21,7 @@ function activate(context) {
 		const disposable = vscode.commands.registerCommand(name, callback);
 		context.subscriptions.push(disposable);
 	});
+	vscode.window.showInformationMessage("Task Completed!")
 }
 
 // This method is called when your extension is deactivated

@@ -102,7 +102,7 @@ async function explainCodeCommand(context) {
 			}
 		}
 
-		vscode.window.showInformationMessage("Tars completed explain code command");
+		
 	}
 }
 

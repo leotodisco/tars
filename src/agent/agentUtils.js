@@ -2,23 +2,18 @@ const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's men
 
 Your task is to:
 1. Analyze the code.
-2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., function body, if block, else, else-if, except, try, loop, single-line statement with a completely distinct purpose).
- Each cluster must represent a meaningful, self-contained unit of logic.
-3. For each cluster, return a dictionary with the following structure:
-
-{{
-    "text": "cluster code snippet as-is, preserving the original formatting and indentation",
-    "description": "a natural language explanation of what this cluster does written following the user mental state"
-}}
+2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., entire function body when it is small, if block, else, else-if, except, try, loop, single-line statement with a completely distinct purpose).
+Each cluster must represent a meaningful, self-contained unit of logic.
+3. provide some description written in a way that addresses the user preferences
 
 - **If in the input code there is something that is not important/complex and the user claimed that he wants some minimal explanation, please respond only with "None" as value for the "description" field**
 
 Output a **list of these dictionaries**, preserving the original order of the code.
-When writing the description you must **ALWAYS** consider the user mental state
+When writing the description you must **ALWAYS** consider the user user preferences
 **NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.**
 
 **Important rules**:
-- **Always consider the User's mental state** when writing the description (e.g., experience level, learning goal, tone preference).
+- **Always consider the User's mental state** when writing the description (e.g., experience level, format of the explanations e.g. short or detailed, tone preference).
 - **NEVER** change the number of spaces or indentation in the "text" field. The formatting must remain exactly as in the original code.
 - The output **must contain multiple clusters** — do not return a single block of code.
 - Maintain the **original code sequence**; do not reorder the clusters.

@@ -5,11 +5,16 @@ const { LLMType } = require("./agentState");
 const vscode = require('vscode');
 const fetch = require('node-fetch');
 
+
+
+
+
+
 const LLMFactory = {
     createLLM: async function (llmType, modelName, apiKey) {
         switch (llmType) {
-            case LLMType.OLLAMA:
-                return await initializeOllamaModel(modelName);
+            // case LLMType.OLLAMA:
+            //     return await initializeOllamaModel(modelName);
 
             case LLMType.OPENAI:
                 return new ChatOpenAI({
