@@ -90,7 +90,10 @@ async function explainCodeCommand(context) {
 		for (const element of outputList) {
 			elementIndex += 1;
 			const matchText = element["text"];
-			if (document.getText(construct.range).includes(matchText)) {
+			const rawText = document.getText(construct.range).replace(/\s+/g, ' ').trim();
+			const matchClean = matchText.replace(/\s+/g, ' ').trim();
+
+			if (rawText.includes(matchClean)) {
 				// "No exp" is the response that the LLM gives if it has no a meaningful explanation for the input code.
 				// in that case we must not show the explanation
 				if (element["description"] === "No exp") {
@@ -99,6 +102,24 @@ async function explainCodeCommand(context) {
 					element["description"] = "   "
 				}
 				decorateExplanation(editor, document, element, elementIndex, matchText);
+			}
+			else {
+				vscode.window.showInformationMessage(
+					`❌ No match found.\n` +
+					`Element text: ${element["text"]}\n` +
+					`Range: from line ${construct.range.start.line} to ${construct.range.end.line}\n` +
+					`Text in document: ${document.getText(construct.range)}`
+				);
+
+				console.log(
+					`--❌ No match found:
+					• Element text    : ${element["text"]}
+					• Range           : from line ${construct.range.start.line} to ${construct.range.end.line}
+					• Text in document:
+  					${document.getText(construct.range)}`
+				);
+
+
 			}
 		}
 	}

@@ -12,6 +12,7 @@ Your task is to:
    - Each cluster is a **logically cohesive block** (e.g., function body, if/else block, loop, try/except, or even a single unrelated line)
    - Each cluster should be a **meaningful, self-contained unit of logic**
    - Clusters must **preserve the original code order and indentation exactly**
+   - If a function is small enough you may consider it as an entire cluster.
 
 3. For each cluster, return a **dictionary** with:
    - "text": the **exact code** in that cluster (DO NOT change spaces or indentation)

@@ -99,7 +99,23 @@ function createDecorationType(contentText, borderColor) {
  * @param {string} matchText - The code snippet text to locate in the document.
  */
 function decorateExplanation(editor, document, element, elementIndex, matchText) {
-    const startIndex = document.getText().indexOf(matchText);
+    //const startIndex = document.getText().indexOf(matchText);
+    const startIndex = findLooseMatchIndex(document.getText(), matchText);
+    
+    if (startIndex === -1) {
+        console.warn("⚠️ Match not found for matchText:");
+        console.warn(matchText);
+        const fullText = document.getText();
+
+        if (fullText.includes(matchText)) {
+            console.log("Però getText lo contiene")
+        }
+        else {
+            console.log("Però getText NON lo contiene")   
+            console.log(document.getText())
+        }
+    } 
+    
     const endIndex = startIndex + matchText.length;
     const startPosition = document.positionAt(startIndex);
     const endPosition = document.positionAt(endIndex);
@@ -138,6 +154,53 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
         // se tema è scuro metti testo di colore chiaro
         editor.setDecorations(type, [range]);
     });
+}
+
+function normalizeChar(c) {
+    // Rende uniformi spazi, tab e newline
+    if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
+        return ' ';
+    }
+    return c;
+}
+
+function compressWhitespace(str) {
+    // Converte ogni sequenza di spazi/tab/newline in un singolo spazio
+    return str
+        .split('')
+        .map(normalizeChar)
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function findLooseMatchIndex(documentText, matchText) {
+    const target = compressWhitespace(matchText);
+    const normalizedDoc = compressWhitespace(documentText);
+
+    // Trova indice semantico nel testo normalizzato
+    const semanticIndex = normalizedDoc.indexOf(target);
+    if (semanticIndex === -1) return -1;
+
+    // Ora, trova la vera posizione nell'originale che corrisponde a semanticIndex
+    let docIndex = 0;
+    let normIndex = 0;
+
+    while (docIndex < documentText.length && normIndex < semanticIndex) {
+        const normChar = normalizeChar(documentText[docIndex]);
+        if (normChar === ' ') {
+            // Salta gruppo di whitespace
+            while (docIndex < documentText.length && normalizeChar(documentText[docIndex]) === ' ') {
+                docIndex++;
+            }
+            normIndex++;
+        } else {
+            docIndex++;
+            normIndex++;
+        }
+    }
+
+    return docIndex;
 }
 
 module.exports = {
