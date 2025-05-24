@@ -15,7 +15,7 @@ async function planner(state) {
         results: z.array(
             z.object({
                 text: z.string().describe("Code snippet exactly as has been sent from the user (no change in indentation or spaces)"),
-                description: z.string().describe("A natural language description of what the code does written in a way that follows the user preferences.")
+                description: z.string().describe("A natural language description of what the code does written in a way that follows the user preferences.  Write the string \"No exp\" as description if the code is trivial and explanations are useless (e.g. simple assign statement, simple declarations, basic return statements)")
             })
         ).describe("A list of code snippets with their descriptions")
     }).describe("An object containing a list of results");
@@ -104,10 +104,7 @@ async function planner(state) {
     console.log("Type:", typeof response);
     let responseString = response
     const list = response.results ?? [];
-    // const jsonList = list.map(item => ({
-    //     text: item.text ?? "",
-    //     description: item.description ?? ""
-    // }));
+
     const jsonList = list.map(item => ({
         text: (item.text ?? "").trimStart(),
         description: item.description ?? ""

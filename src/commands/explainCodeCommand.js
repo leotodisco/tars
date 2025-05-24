@@ -31,8 +31,6 @@ async function explainCodeCommand(context) {
 		config = context.globalState.get('tarsConfiguration');
 	}
 
-	console.log("###")
-	console.log(config)
 	const llmName = config[0]["answer"]
 	const llmType = config[1]["answer"]
 	const llmAPI = config[2]["answer"]
@@ -92,17 +90,17 @@ async function explainCodeCommand(context) {
 		for (const element of outputList) {
 			elementIndex += 1;
 			const matchText = element["text"];
-
 			if (document.getText(construct.range).includes(matchText)) {
-				if (element["description"] === "None") {
-					console.log("--- None found\n")
-					continue;
+				// "No exp" is the response that the LLM gives if it has no a meaningful explanation for the input code.
+				// in that case we must not show the explanation
+				if (element["description"] === "No exp") {
+					console.log("-.- NO EXP FOUND")
+					//continue;
+					element["description"] = "   "
 				}
 				decorateExplanation(editor, document, element, elementIndex, matchText);
 			}
 		}
-
-
 	}
 }
 

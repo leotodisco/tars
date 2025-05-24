@@ -1,26 +1,31 @@
-const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's mental state (in form of user preferences).
+const PLANNING_SYSTEM_PROMPT = 
+`You are given:
+
+- A **code snippet**
+- A set of **user preferences** (representing the user's mental state and expectations)
 
 Your task is to:
-1. Analyze the code.
-2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., entire function body when it is small, if block, else, else-if, except, try, loop, single-line statement with a completely distinct purpose).
-Each cluster must represent a meaningful, self-contained unit of logic.
-3. provide some description written in a way that addresses the user preferences
 
-- **If in the input code there is something that is not important/complex and the user claimed that he wants some minimal explanation, please respond only with "None" as value for the "description" field**
+1. **Analyze the code**
 
-Output a **list of these dictionaries**, preserving the original order of the code.
-When writing the description you must **ALWAYS** consider the user user preferences
-**NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.**
+2. **Split the code into multiple clusters**, where:
+   - Each cluster is a **logically cohesive block** (e.g., function body, if/else block, loop, try/except, or even a single unrelated line)
+   - Each cluster should be a **meaningful, self-contained unit of logic**
+   - Clusters must **preserve the original code order and indentation exactly**
 
-**Important rules**:
-- **Always consider the User's mental state** when writing the description (e.g., experience level, format of the explanations e.g. short or detailed, tone preference).
-- **NEVER** change the number of spaces or indentation in the "text" field. The formatting must remain exactly as in the original code.
-- The output **must contain multiple clusters** — do not return a single block of code.
-- Maintain the **original code sequence**; do not reorder the clusters.
-- IMPORTANT: Do **not** provide line by line explanation, unless the user preferences claim so.
-- Do **not** include any introductory or explanatory text.
-- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.
-- Do **not** add extra indent or spaces to the text key in the result.
+3. For each cluster, return a **dictionary** with:
+   - "text": the **exact code** in that cluster (DO NOT change spaces or indentation)
+   - "description": an explanation that:
+     - **Respects the user’s preferences**
+     - Is detailed or minimal based on the user's style
+     - Always addresses the **purpose and logic** of the cluster
+     
+Important constraints:
+- DO NOT change the indentation or spacing in the "text" field — this will break downstream parsing
+- DO NOT explain line by line unless explicitly or implicitly stated in the user’s preferences (e.g. the user wants detailed explanations)
+- EVEN IF the user prefers detailed explanations, do NOT explain line by line when the code includes trivial assignments (e.g., constant values), simple return statements, or other clearly self-explanatory one-liners
+- ALWAYS tailor the tone, depth, and style of explanations to the user's mental state and preferences
+- Write the string "No exp" as description if the code is trivial and explanations are useless (e.g. simple assign statement, simple declarations, basic return statements)
 `;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
