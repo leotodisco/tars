@@ -1,32 +1,43 @@
 const PLANNING_SYSTEM_PROMPT = 
 `You are given:
 
-- A **code snippet**
+- A **code snippet**, typically a function/method/class
 - A set of **user preferences** (representing the user's mental state and expectations)
 
 Your task is to:
 
-1. **Analyze the code**
+1. Split the code into multiple clusters, where:
+   - Each cluster must be a logically cohesive block, meaning it represents a self-contained unit of purpose or behavior.
+   - A helpful rule of thumb is to consider the entire body of each control structure—like an if block, a for loop, or a try/except—as one cluster, because these structures usually encapsulate a single, self-contained logical operation.
+   For example:
+     - the entire body of an if, else, or elif block
+     - the entire body of a for or while loop
+     - the entire body of a try, except, or finally block
+   - Do NOT create single-line clusters unless absolutely necessary (e.g., an isolated return or assert statement with no adjacent logic).
+   - Prefer grouping consecutive simple lines together into a single cluster when they belong to the same logical flow.
+   - Clusters must preserve the original code order and indentation exactly
 
-2. **Split the code into multiple clusters**, where:
-   - Each cluster is a **logically cohesive block** (e.g., function body, if/else block, loop, try/except, or even a single unrelated line)
-   - Each cluster should be a **meaningful, self-contained unit of logic**
-   - Clusters must **preserve the original code order and indentation exactly**
-   - If a function is small enough you may consider it as an entire cluster.
-
-3. For each cluster, return a **dictionary** with:
+2. For each cluster identified, return a **dictionary** with:
    - "text": the **exact code** in that cluster (DO NOT change spaces or indentation)
    - "description": an explanation that:
      - **Respects the user’s preferences**
      - Is detailed or minimal based on the user's style
      - Always addresses the **purpose and logic** of the cluster
-     
+
 Important constraints:
 - DO NOT change the indentation or spacing in the "text" field — this will break downstream parsing
-- DO NOT explain line by line unless explicitly or implicitly stated in the user’s preferences (e.g. the user wants detailed explanations)
-- EVEN IF the user prefers detailed explanations, do NOT explain line by line when the code includes trivial assignments (e.g., constant values), simple return statements, or other clearly self-explanatory one-liners
-- ALWAYS tailor the tone, depth, and style of explanations to the user's mental state and preferences
-- Write the string "No exp" as description if the code is trivial and explanations are useless (e.g. simple assign statement, simple declarations, basic return statements)
+- DO NOT explain line by line unless the user explicitly requests it in their preferences
+- DO NOT describe simple, self-evident lines such as:
+  - Constant assignments (e.g. x = 5)
+  - Basic return statements (e.g. return result)
+  - Obvious initializations (e.g. count = 0)
+  - Simple list/dictionary creation without logic
+- When a line is trivial or meaningless to explain alone, simply write:
+  - "description": "No exp"
+- Describe **why the logic exists** and **what each block is doing**, not how each syntax element works unless the user is using you to learn a new language.
+- The sum of all clusters is the exact SAME input code 
+
+The output must be readable, purposeful, and adapted to the mental model and expectations of the user.
 `;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
