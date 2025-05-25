@@ -52,17 +52,28 @@ async function explainCodeCommand(context) {
 		`- Use the following tone: ${userMind[6]["answer"]}`
 	].join("\n");
 
-	// Find code constructs using vsCode parser
-	const constructs = await findConstructs(document);
-	const isConstructBased = constructs.some(c =>
-		c.type === "Method" || c.type === "Function" || c.type === "Class"
-	);
+	const selection = editor.selection;
+	const hasSelection = selection && !selection.isEmpty;
 
-	// if there are no classes/methods/functions uses the entire code in the document for the agent execution
-	const targets = isConstructBased ? constructs : [{
-		sourceCode: document.getText(),
-		range: new vscode.Range(0, 0, document.lineCount, 0) // fallback range
-	}];
+	const constructs = await findConstructs(document);
+
+	let targets;
+
+	if (hasSelection) {
+		targets = [{
+			sourceCode: document.getText(selection),
+			range: selection
+		}];
+	} else {
+		const isConstructBased = constructs.some(c =>
+			c.type === "Method" || c.type === "Function" || c.type === "Class"
+		);
+
+		targets = isConstructBased ? constructs : [{
+			sourceCode: document.getText(),
+			range: new vscode.Range(0, 0, document.lineCount, 0)
+		}];
+	}
 
 	// find functions/classes/methods from other files that are imported in the current file
 	const importedConstructs = await extractImportedConstructs(document)
@@ -104,6 +115,7 @@ async function explainCodeCommand(context) {
 				decorateExplanation(editor, document, element, elementIndex, matchText);
 			}
 			else {
+				// Just for debug purpose
 				vscode.window.showInformationMessage(
 					`❌ No match found.\n` +
 					`Element text: ${element["text"]}\n` +
