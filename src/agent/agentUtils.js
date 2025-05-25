@@ -9,13 +9,16 @@ Your task is to:
 1. Split the code into multiple clusters, where:
    - Each cluster must be a logically cohesive block, meaning it represents a self-contained unit of purpose or behavior.
    - A helpful rule of thumb is to consider the entire body of each control structure—like an if block, a for loop, or a try/except—as one cluster, because these structures usually encapsulate a single, self-contained logical operation.
-   For example:
-     - the entire body of an if, else, or elif block
-     - the entire body of a for or while loop
-     - the entire body of a try, except, or finally block
+     For example:
+       - the entire body of an if, else, or elif block
+       - the entire body of a for or while loop
+       - the entire body of a try, except, or finally block
    - Do NOT create single-line clusters unless absolutely necessary (e.g., an isolated return or assert statement with no adjacent logic).
    - Prefer grouping consecutive simple lines together into a single cluster when they belong to the same logical flow.
-   - Clusters must preserve the original code order and indentation exactly
+   - The number of clusters can also depend on the user's preferences:
+     - For less experienced users, or when detailed explanations are requested, it is better to divide the code into **more fine-grained clusters** to improve clarity and focus.
+     - For experienced users or when minimal explanations are requested, prefer **larger clusters** that represent broader logical units.
+   - Clusters must preserve the original code order and indentation exactly.
 
 2. For each cluster identified, return a **dictionary** with:
    - "text": the **exact code** in that cluster (DO NOT change spaces or indentation)
@@ -35,7 +38,7 @@ Important constraints:
 - When a line is trivial or meaningless to explain alone, simply write:
   - "description": "No exp"
 - Describe **why the logic exists** and **what each block is doing**, not how each syntax element works unless the user is using you to learn a new language.
-- The sum of all clusters is the exact SAME input code 
+The concatenation of all clusters must exactly reconstruct the original input code, with no additions, omissions, or changes in formatting (including whitespace and indentation).
 
 The output must be readable, purposeful, and adapted to the mental model and expectations of the user.
 `;
