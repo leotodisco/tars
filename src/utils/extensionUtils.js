@@ -154,6 +154,8 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
         // se tema è scuro metti testo di colore chiaro
         editor.setDecorations(type, [range]);
     });
+
+    return decorations;
 }
 
 function normalizeChar(c) {
@@ -203,10 +205,16 @@ function findLooseMatchIndex(documentText, matchText) {
     return docIndex;
 }
 
+let extensionState = {
+    decorations: [],        
+    decorationsVisible: true
+};
+
 module.exports = {
     normalizeOutputStructure,
     splitExplanationText,
     getMaxLineLength,
     createDecorationType,
     decorateExplanation,
+    extensionState
 };

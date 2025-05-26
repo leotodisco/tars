@@ -6,10 +6,12 @@ const { findConstructs, extractImportedConstructs } = require("../utils/construc
 const { findMatches } = require("../utils/stringUtils")
 const {
 	normalizeOutputStructure,
-	decorateExplanation
+	decorateExplanation,
+	extensionState
 } = require('../utils/extensionUtils');
 const { runTomQuiz } = require("./tomCommand.js")
 const { configureTars } = require("./configureTarsCommand.js")
+const { toggleDecorations } = require("./toggleDecorationsCommand.js")
 
 /**
  * Analyzes the active code editor and generates contextual explanations for 
@@ -23,6 +25,9 @@ async function explainCodeCommand(context) {
 	if (!editor) return;
 	const document = editor.document;
 	const agentInstance = agent.compile();
+
+	extensionState.decorations = []
+	toggleDecorations(context)
 
 	// Retrieve tars configuration (LLM Name and APIs)
 	let config = context.globalState.get('tarsConfiguration');
@@ -108,11 +113,12 @@ async function explainCodeCommand(context) {
 				// "No exp" is the response that the LLM gives if it has no a meaningful explanation for the input code.
 				// in that case we must not show the explanation
 				if (element["description"] === "No exp") {
-					console.log("-.- NO EXP FOUND")
+					console.log("-- NO EXP FOUND")
 					//continue;
 					element["description"] = "   "
 				}
-				decorateExplanation(editor, document, element, elementIndex, matchText);
+				extensionState.decorations.push(...decorateExplanation(editor, document, element, elementIndex, matchText));
+				extensionState.decorationsVisible = true;
 			}
 			else {
 				// Just for debug purpose

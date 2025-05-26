@@ -19,6 +19,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "tars.toggle-decorations",
+        "title": "Toggle Decorations"
+      },
+      {
         "command": "tars.help-command",
         "title": "Tars Help"
       },
