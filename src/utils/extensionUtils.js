@@ -29,7 +29,7 @@ function splitExplanationText(text, sourceCode) {
     const words = text.split(" ");
     const nLines = (sourceCode.match(/\n/g) || []).length + 1;
     //const maxCharsPerLine = text.length/nLines
-    const maxCharsPerLine = 280 // is the default
+    const maxCharsPerLine = 500 // is the default
     let currentLine = "";
     const lines = [];
 
@@ -101,7 +101,7 @@ function createDecorationType(contentText, borderColor) {
 function decorateExplanation(editor, document, element, elementIndex, matchText) {
     //const startIndex = document.getText().indexOf(matchText);
     const startIndex = findLooseMatchIndex(document.getText(), matchText);
-    
+
     if (startIndex === -1) {
         console.warn("⚠️ Match not found for matchText:");
         console.warn(matchText);
@@ -111,11 +111,11 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
             console.log("Però getText lo contiene")
         }
         else {
-            console.log("Però getText NON lo contiene")   
+            console.log("Però getText NON lo contiene")
             console.log(document.getText())
         }
-    } 
-    
+    }
+
     const endIndex = startIndex + matchText.length;
     const startPosition = document.positionAt(startIndex);
     const endPosition = document.positionAt(endIndex);
@@ -133,7 +133,6 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     const borderColor = elementIndex % 2 === 0
         ? "rgb(255, 255, 112)"     // Giallo
         : "rgba(128, 0, 255, 1)";    // Viola
-    const themeColor = vscode.window.activeColorTheme.kind
     const decorations = explanationLines
         .slice(0, endLine - startLine + 1)
         .map((text, i) => {
@@ -206,7 +205,7 @@ function findLooseMatchIndex(documentText, matchText) {
 }
 
 let extensionState = {
-    decorations: [],        
+    decorations: [],
     decorationsVisible: true
 };
 

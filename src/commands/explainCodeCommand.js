@@ -25,7 +25,7 @@ async function explainCodeCommand(context) {
 	if (!editor) return;
 	const document = editor.document;
 	const agentInstance = agent.compile();
-
+	// clean up the editor and the extensionState
 	extensionState.decorations = []
 	toggleDecorations(context)
 
@@ -59,11 +59,11 @@ async function explainCodeCommand(context) {
 
 	const selection = editor.selection;
 	const hasSelection = selection && !selection.isEmpty;
-
-	const constructs = await findConstructs(document);
-
+	const constructs = await findConstructs(document); // use vsCode parser
 	let targets;
 
+	// consider only the highlighted code if any
+	// otherwise consider the entire file 
 	if (hasSelection) {
 		targets = [{
 			sourceCode: document.getText(selection),
@@ -98,7 +98,7 @@ async function explainCodeCommand(context) {
 				importedConstructs: importedConstructs
 			});
 		} catch (error) {
-			console.error("Errore durante l'invocazione dell'agente:", error);
+			console.error("Error during agent invocation:", error);
 		}
 		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 		let elementIndex = 0;
@@ -113,10 +113,10 @@ async function explainCodeCommand(context) {
 				// "No exp" is the response that the LLM gives if it has no a meaningful explanation for the input code.
 				// in that case we must not show the explanation
 				if (element["description"] === "No exp") {
-					console.log("-- NO EXP FOUND")
-					//continue;
 					element["description"] = "   "
 				}
+				// The decorations returned by decorateExplanation are applied and stored in the shared extension state.
+				// This enables toggling, clearing, or reapplying.
 				extensionState.decorations.push(...decorateExplanation(editor, document, element, elementIndex, matchText));
 				extensionState.decorationsVisible = true;
 			}
