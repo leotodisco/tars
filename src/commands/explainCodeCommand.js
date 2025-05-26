@@ -3,6 +3,7 @@ const vscode = require('vscode');
 const { agent } = require("../agent/agent");
 const fs = require('fs'); // Use this to print image later
 const { findConstructs, extractImportedConstructs } = require("../utils/constructsRetriever")
+const { getCachedExplanation, storeExplanation } = require("../utils/cache.js")
 const { findMatches } = require("../utils/stringUtils")
 const {
 	normalizeOutputStructure,
@@ -86,23 +87,32 @@ async function explainCodeCommand(context) {
 	// invoke agent for each construct found
 	vscode.window.showInformationMessage("Starting Agent...")
 	for (const construct of targets) {
-		let agentResponse;
-		try {
-			agentResponse = await agentInstance.invoke({
-				modelName: llmName,
-				inputCode: construct.sourceCode,
-				llmType: llmType === "api" ? LLMType.OPENAI : LLMType.OLLAMA,
-				maxAttempts: 3,
-				userProfile: userMindString,
-				llmAPI: llmAPI,
-				importedConstructs: importedConstructs
-			});
-		} catch (error) {
-			console.error("Error during agent invocation:", error);
+		const cached = getCachedExplanation(construct.sourceCode);
+		let outputList;
+		if (cached) {
+			outputList = normalizeOutputStructure(cached);
 		}
-		const outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
+		else {
+			let agentResponse;
+			try {
+				agentResponse = await agentInstance.invoke({
+					modelName: llmName,
+					inputCode: construct.sourceCode,
+					llmType: llmType === "api" ? LLMType.OPENAI : LLMType.OLLAMA,
+					maxAttempts: 3,
+					userProfile: userMindString,
+					llmAPI: llmAPI,
+					importedConstructs: importedConstructs
+				});
+			} catch (error) {
+				console.error("Error during agent invocation:", error);
+			}
+			outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
+			storeExplanation(construct.sourceCode, outputList);
+		}
 		let elementIndex = 0;
 
+		// show decorations in editor
 		for (const element of outputList) {
 			elementIndex += 1;
 			const matchText = element["text"];

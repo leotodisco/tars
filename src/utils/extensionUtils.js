@@ -104,16 +104,6 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
 
     if (startIndex === -1) {
         console.warn("⚠️ Match not found for matchText:");
-        console.warn(matchText);
-        const fullText = document.getText();
-
-        if (fullText.includes(matchText)) {
-            console.log("Però getText lo contiene")
-        }
-        else {
-            console.log("Però getText NON lo contiene")
-            console.log(document.getText())
-        }
     }
 
     const endIndex = startIndex + matchText.length;

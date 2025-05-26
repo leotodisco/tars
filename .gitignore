@@ -4,3 +4,4 @@ node_modules
 *.png
 *.env
 *.DS_Store
+src/utils/explanationCache.json

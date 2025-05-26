@@ -11,8 +11,8 @@ const { toggleDecorations } = require("./src/commands/toggleDecorationsCommand.j
 function activate(context) {
 	const commands = [
 		{
-			name: 'tars.explain-code', callback: () => {
-				explainCodeCommand(context);
+			name: 'tars.explain-code', callback: async () => {
+				await explainCodeCommand(context);
 				vscode.window.showInformationMessage("Task Completed!");
 			}
 		},
