@@ -17,33 +17,6 @@ function normalizeOutputStructure(outputStructure) {
     return [];
 }
 
-/**
- * Splits a long explanation into multiple lines based on a max character limit per line.
- * Words are preserved and not broken across lines.
- *
- * @param {string} text - The explanation text to split.
- * @param {string} sourceCode - The source code related to the explanation.
- * @returns {string[]} - An array of text lines.
- */
-function splitExplanationText(text, sourceCode) {
-    const words = text.split(" ");
-    const nLines = (sourceCode.match(/\n/g) || []).length + 1;
-    //const maxCharsPerLine = text.length/nLines
-    const maxCharsPerLine = 500 // is the default
-    let currentLine = "";
-    const lines = [];
-
-    words.forEach(word => {
-        if ((currentLine + word).length > maxCharsPerLine) {
-            lines.push(currentLine.trim());
-            currentLine = word + " ";
-        } else {
-            currentLine += word + " ";
-        }
-    });
-    lines.push(currentLine.trim());
-    return lines;
-}
 
 /**
  * Calculates the maximum line length within a given range of lines in the document.
@@ -88,6 +61,22 @@ function createDecorationType(contentText, borderColor) {
     });
 }
 
+function distributeExplanationAcrossLines(explanation, numberOfLines) {
+    const words = explanation.split(/\s+/);
+    const lines = Array.from({ length: numberOfLines }, () => "");
+
+    let currentLine = 0;
+
+    for (const word of words) {
+        lines[currentLine] += (lines[currentLine] ? " " : "") + word;
+        if (lines[currentLine].length > 60 && currentLine < numberOfLines - 1) {
+            currentLine++;
+        }
+    }
+
+    return lines;
+}
+
 /**
  * Adds visual decorations (explanations) to the lines of code that match a given element.
  * The explanation is aligned to the right of the code and styled using alternating colors.
@@ -99,11 +88,12 @@ function createDecorationType(contentText, borderColor) {
  * @param {string} matchText - The code snippet text to locate in the document.
  */
 function decorateExplanation(editor, document, element, elementIndex, matchText) {
-    //const startIndex = document.getText().indexOf(matchText);
     const startIndex = findLooseMatchIndex(document.getText(), matchText);
 
     if (startIndex === -1) {
         console.warn("⚠️ Match not found for matchText:");
+        console.warn(matchText);
+        return [];
     }
 
     const endIndex = startIndex + matchText.length;
@@ -113,34 +103,46 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     const startLine = range.start.line;
     const endLine = range.end.line;
     const explanation = element["description"];
-    let explanationLines = splitExplanationText(explanation, element["text"]);
+    let explanationLines = distributeExplanationAcrossLines(explanation, endLine - startLine + 1);
 
     // Pad with empty lines if the explanation is shorter than the code block
     while (explanationLines.length < endLine - startLine + 1) {
         explanationLines.push(" ");
     }
 
+    // Calculate the max line length in the code block
+    const maxLineLength = Math.max(
+        ...Array.from({ length: endLine - startLine + 1 }, (_, i) =>
+            document.lineAt(startLine + i).text.length
+        )
+    );
+
     const borderColor = elementIndex % 2 === 0
-        ? "rgb(255, 255, 112)"     // Giallo
-        : "rgba(128, 0, 255, 1)";    // Viola
+        ? "rgb(255, 255, 112)"     // Yellow
+        : "rgba(128, 0, 255, 1)";  // Purple
+
     const decorations = explanationLines
         .slice(0, endLine - startLine + 1)
         .map((text, i) => {
             const line = startLine + i;
-            const type = createDecorationType(text, borderColor);
-            const lineLength = document.lineAt(line).text.length;
+            const actualLineLength = document.lineAt(line).text.length;
+
+            // Add padding so all explanations start at the same column
+            const paddingSize = maxLineLength - actualLineLength + 1; // +1 for spacing
+            const padding = '\u00A0'.repeat(paddingSize); // non-breaking spaces
+            const paddedText = padding + text;
+
+            const type = createDecorationType(paddedText, borderColor);
 
             const lineRange = new vscode.Range(
-                new vscode.Position(line, lineLength),
-                new vscode.Position(line, lineLength)
+                new vscode.Position(line, actualLineLength),
+                new vscode.Position(line, actualLineLength)
             );
 
             return { type, range: lineRange };
         });
 
     decorations.forEach(({ type, range }) => {
-        // se tema è chiaro metti testo di colore
-        // se tema è scuro metti testo di colore chiaro
         editor.setDecorations(type, [range]);
     });
 
@@ -201,7 +203,6 @@ let extensionState = {
 
 module.exports = {
     normalizeOutputStructure,
-    splitExplanationText,
     getMaxLineLength,
     createDecorationType,
     decorateExplanation,

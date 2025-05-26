@@ -86,6 +86,7 @@ async function explainCodeCommand(context) {
 
 	// invoke agent for each construct found
 	vscode.window.showInformationMessage("Starting Agent...")
+	let elementIndex = 0;
 	for (const construct of targets) {
 		const cached = getCachedExplanation(construct.sourceCode);
 		let outputList;
@@ -110,7 +111,7 @@ async function explainCodeCommand(context) {
 			outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 			storeExplanation(construct.sourceCode, outputList);
 		}
-		let elementIndex = 0;
+		
 
 		// show decorations in editor
 		for (const element of outputList) {
