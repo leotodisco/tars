@@ -46,14 +46,14 @@ function createDecorationType(contentText, borderColor) {
         vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ||
         vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast;
 
-    const textColor = isDarkTheme ? 'white' : 'black'; // solo colore del testo
+    const textColor = isDarkTheme ? 'gray' : 'black'; // solo colore del testo
 
     return vscode.window.createTextEditorDecorationType({
         isWholeLine: true,
         after: {
             contentText: `  ${contentText}`,
             color: textColor,
-            fontWeight: "1200",
+            fontWeight: "100",
         },
         borderColor: borderColor,
         borderStyle: 'solid',
@@ -62,19 +62,20 @@ function createDecorationType(contentText, borderColor) {
 }
 
 function distributeExplanationAcrossLines(explanation, numberOfLines) {
-    const words = explanation.split(/\s+/);
-    const lines = Array.from({ length: numberOfLines }, () => "");
+    const words = explanation.trim().split(/\s+/);
+    const lines = Array.from({ length: numberOfLines }, () => []);
 
-    let currentLine = 0;
+    const wordsPerLine = Math.ceil(words.length / numberOfLines);
+    let wordIndex = 0;
 
-    for (const word of words) {
-        lines[currentLine] += (lines[currentLine] ? " " : "") + word;
-        if (lines[currentLine].length > 60 && currentLine < numberOfLines - 1) {
-            currentLine++;
+    for (let i = 0; i < numberOfLines && wordIndex < words.length; i++) {
+        while (lines[i].length < wordsPerLine && wordIndex < words.length) {
+            lines[i].push(words[wordIndex]);
+            wordIndex++;
         }
     }
 
-    return lines;
+    return lines.map(words => words.join(" "));
 }
 
 /**
