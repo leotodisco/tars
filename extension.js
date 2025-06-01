@@ -4,11 +4,14 @@ const { runTomQuiz, flushUserMind, showUserMentalState } = require("./src/comman
 const { configureTars, showConfig, flushConfiguration } = require("./src/commands/configureTarsCommand.js")
 const { helpCommand } = require("./src/commands/helpCommand.js")
 const { toggleDecorations } = require("./src/commands/toggleDecorationsCommand.js")
+const { indexProjectCommand } = require("./src/commands/indexProjectDocumentsCommand.js")
+const { retrieve } = require("./src/vectorDB/chromaRetriever.js")
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+	// TODO initialize chrome vector db instance if not present
 	const commands = [
 		{
 			name: 'tars.explain-code', callback: async () => {
@@ -23,7 +26,9 @@ function activate(context) {
 		{ name: 'tars.flush-tars-config', callback: () => flushConfiguration(context) },
 		{ name: 'tars.show-tars-config', callback: () => showConfig(context) },
 		{ name: 'tars.help-command', callback: () => helpCommand(context) },
-		{ name: 'tars.toggle-decorations', callback: () => toggleDecorations(context) }
+		{ name: 'tars.toggle-decorations', callback: () => toggleDecorations(context) },
+		{ name: 'tars.index-project', callback: () => indexProjectCommand(context) },
+		{ name: 'tars.retrieve', callback: () => retrieve("crea_area_assistenza") },
 	];
 
 	commands.forEach(({ name, callback }) => {
