@@ -17,33 +17,6 @@ function normalizeOutputStructure(outputStructure) {
     return [];
 }
 
-/**
- * Splits a long explanation into multiple lines based on a max character limit per line.
- * Words are preserved and not broken across lines.
- *
- * @param {string} text - The explanation text to split.
- * @param {string} sourceCode - The source code related to the explanation.
- * @returns {string[]} - An array of text lines.
- */
-function splitExplanationText(text, sourceCode) {
-    const words = text.split(" ");
-    const nLines = (sourceCode.match(/\n/g) || []).length + 1;
-    //const maxCharsPerLine = text.length/nLines
-    const maxCharsPerLine = 280 // is the default
-    let currentLine = "";
-    const lines = [];
-
-    words.forEach(word => {
-        if ((currentLine + word).length > maxCharsPerLine) {
-            lines.push(currentLine.trim());
-            currentLine = word + " ";
-        } else {
-            currentLine += word + " ";
-        }
-    });
-    lines.push(currentLine.trim());
-    return lines;
-}
 
 /**
  * Calculates the maximum line length within a given range of lines in the document.
@@ -73,19 +46,36 @@ function createDecorationType(contentText, borderColor) {
         vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ||
         vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.HighContrast;
 
-    const textColor = isDarkTheme ? 'white' : 'black'; // solo colore del testo
+    const textColor = isDarkTheme ? 'gray' : 'black'; // solo colore del testo
 
     return vscode.window.createTextEditorDecorationType({
         isWholeLine: true,
         after: {
             contentText: `  ${contentText}`,
             color: textColor,
-            fontWeight: "1200",
+            fontWeight: "100",
         },
         borderColor: borderColor,
         borderStyle: 'solid',
         borderWidth: '0 0 0 1px',
     });
+}
+
+function distributeExplanationAcrossLines(explanation, numberOfLines) {
+    const words = explanation.trim().split(/\s+/);
+    const lines = Array.from({ length: numberOfLines }, () => []);
+
+    const wordsPerLine = Math.ceil(words.length / numberOfLines);
+    let wordIndex = 0;
+
+    for (let i = 0; i < numberOfLines && wordIndex < words.length; i++) {
+        while (lines[i].length < wordsPerLine && wordIndex < words.length) {
+            lines[i].push(words[wordIndex]);
+            wordIndex++;
+        }
+    }
+
+    return lines.map(words => words.join(" "));
 }
 
 /**
@@ -99,7 +89,14 @@ function createDecorationType(contentText, borderColor) {
  * @param {string} matchText - The code snippet text to locate in the document.
  */
 function decorateExplanation(editor, document, element, elementIndex, matchText) {
-    const startIndex = document.getText().indexOf(matchText);
+    const startIndex = findLooseMatchIndex(document.getText(), matchText);
+
+    if (startIndex === -1) {
+        console.warn("⚠️ Match not found for matchText:");
+        console.warn(matchText);
+        return [];
+    }
+
     const endIndex = startIndex + matchText.length;
     const startPosition = document.positionAt(startIndex);
     const endPosition = document.positionAt(endIndex);
@@ -107,43 +104,108 @@ function decorateExplanation(editor, document, element, elementIndex, matchText)
     const startLine = range.start.line;
     const endLine = range.end.line;
     const explanation = element["description"];
-    let explanationLines = splitExplanationText(explanation, element["text"]);
+    let explanationLines = distributeExplanationAcrossLines(explanation, endLine - startLine + 1);
 
     // Pad with empty lines if the explanation is shorter than the code block
     while (explanationLines.length < endLine - startLine + 1) {
         explanationLines.push(" ");
     }
 
+    // Calculate the max line length in the code block
+    const maxLineLength = Math.max(
+        ...Array.from({ length: endLine - startLine + 1 }, (_, i) =>
+            document.lineAt(startLine + i).text.length
+        )
+    );
+
     const borderColor = elementIndex % 2 === 0
-    ? "rgb(255, 255, 112)"     // Giallo
-    : "rgba(128, 0, 255, 1)";    // Viola
-    const themeColor = vscode.window.activeColorTheme.kind  
+        ? "rgb(255, 255, 112)"     // Yellow
+        : "rgba(128, 0, 255, 1)";  // Purple
+
     const decorations = explanationLines
         .slice(0, endLine - startLine + 1)
         .map((text, i) => {
             const line = startLine + i;
-            const type = createDecorationType(text, borderColor);
-            const lineLength = document.lineAt(line).text.length;
+            const actualLineLength = document.lineAt(line).text.length;
+
+            // Add padding so all explanations start at the same column
+            const paddingSize = maxLineLength - actualLineLength + 1; // +1 for spacing
+            const padding = '\u00A0'.repeat(paddingSize); // non-breaking spaces
+            const paddedText = padding + text;
+
+            const type = createDecorationType(paddedText, borderColor);
 
             const lineRange = new vscode.Range(
-                new vscode.Position(line, lineLength),
-                new vscode.Position(line, lineLength)
+                new vscode.Position(line, actualLineLength),
+                new vscode.Position(line, actualLineLength)
             );
 
             return { type, range: lineRange };
         });
 
     decorations.forEach(({ type, range }) => {
-        // se tema è chiaro metti testo di colore
-        // se tema è scuro metti testo di colore chiaro
         editor.setDecorations(type, [range]);
     });
+
+    return decorations;
 }
+
+function normalizeChar(c) {
+    // Rende uniformi spazi, tab e newline
+    if (c === ' ' || c === '\t' || c === '\n' || c === '\r') {
+        return ' ';
+    }
+    return c;
+}
+
+function compressWhitespace(str) {
+    // Converte ogni sequenza di spazi/tab/newline in un singolo spazio
+    return str
+        .split('')
+        .map(normalizeChar)
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function findLooseMatchIndex(documentText, matchText) {
+    const target = compressWhitespace(matchText);
+    const normalizedDoc = compressWhitespace(documentText);
+
+    // Trova indice semantico nel testo normalizzato
+    const semanticIndex = normalizedDoc.indexOf(target);
+    if (semanticIndex === -1) return -1;
+
+    // Ora, trova la vera posizione nell'originale che corrisponde a semanticIndex
+    let docIndex = 0;
+    let normIndex = 0;
+
+    while (docIndex < documentText.length && normIndex < semanticIndex) {
+        const normChar = normalizeChar(documentText[docIndex]);
+        if (normChar === ' ') {
+            // Salta gruppo di whitespace
+            while (docIndex < documentText.length && normalizeChar(documentText[docIndex]) === ' ') {
+                docIndex++;
+            }
+            normIndex++;
+        } else {
+            docIndex++;
+            normIndex++;
+        }
+    }
+
+    return docIndex;
+}
+
+let extensionState = {
+    decorations: [],
+    decorationsVisible: true
+};
 
 module.exports = {
     normalizeOutputStructure,
-    splitExplanationText,
     getMaxLineLength,
     createDecorationType,
     decorateExplanation,
+    extensionState
 };

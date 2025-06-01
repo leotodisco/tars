@@ -7,9 +7,29 @@ const { doubleBraces, cleanLLMAnswer, formatTemplate, extractUsedConstructs } = 
 const { agentState } = require("./agentState.js")
 const { logger } = require("../utils/logger")
 const vscode = require('vscode');
+const { z } = require('zod')
+const { ChatOpenAI } = require("@langchain/OpenAI");
 
 async function planner(state) {
-    let llm = await LLMFactory.createLLM(state["llmType"], state["modelName"], state["llmAPI"]);
+    const schema = z.object({
+        results: z.array(
+            z.object({
+                text: z.string().describe("Code snippet exactly as has been sent from the user (no change in indentation or spaces)"),
+                description: z.string().describe("A natural language description of what the code does written in a way that follows the user preferences.  Write the string \"No exp\" as description if the code is trivial and explanations are useless (e.g. simple assign statement, simple declarations, basic return statements)")
+            })
+        ).describe("A list of code snippets with their descriptions")
+    }).describe("An object containing a list of results");
+
+    let llm = new ChatOpenAI({
+        apiKey: state["llmAPI"],
+        model: state["modelName"],
+        temperature: 0,
+        maxTokens: 10000,
+        maxRetries: 5
+    }).withStructuredOutput(schema, {
+        strict: true,
+    });
+
     const importedConstructsCode = extractUsedConstructs(state["inputCode"], state["importedConstructs"])
     logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN
@@ -80,14 +100,31 @@ async function planner(state) {
         vscode.window.showErrorMessage(`Error during Agent execution: ${error} `);
         throw new Error(error.message);
     }
-    let responseString = response["content"]
-    responseString = cleanLLMAnswer(responseString)
+    console.log("####")
+    console.log("Type:", typeof response);
+    let responseString = response
+    const list = response.results ?? [];
+
+    const jsonList = list.map(item => ({
+        text: (item.text ?? "").trimStart(),
+        description: item.description ?? ""
+    }));
+
+    // Convertila in una stringa JSON formattata
+    const newResponseString = JSON.stringify(jsonList, null, 2);
+
+    console.log(newResponseString);
+    // responseString = cleanLLMAnswer(responseString)
 
     if (!responseString) {
         return { inputCode: state["inputCode"] };
     }
     console.log(`RESPONSE STRING = ${responseString}`)
-    return { inputCode: state["inputCode"], outputString: responseString, currentAttemptNumber: state["currentAttemptNumber"] };
+    return {
+        inputCode: state["inputCode"],
+        outputString: newResponseString,
+        currentAttemptNumber: state["currentAttemptNumber"]
+    };
 }
 
 // voglio vedere se ciò che LLM ha generato è un JSON
@@ -180,7 +217,7 @@ const agent = new StateGraph(agentState)
     //.addNode("critiqueNode", critiqueNode)
     .addEdge(START, "plannerNode")
     .addEdge("plannerNode", "syntaxCheck")
-    .addConditionalEdges("syntaxCheck", isSyntaxOK)
-    //.addConditionalEdges("critiqueNode", isCritiqueOK);
+//.addConditionalEdges("syntaxCheck", isSyntaxOK)
+//.addConditionalEdges("critiqueNode", isCritiqueOK);
 
 module.exports = { agent };

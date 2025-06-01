@@ -8,8 +8,8 @@ const fetch = require('node-fetch');
 const LLMFactory = {
     createLLM: async function (llmType, modelName, apiKey) {
         switch (llmType) {
-            case LLMType.OLLAMA:
-                return await initializeOllamaModel(modelName);
+            // case LLMType.OLLAMA:
+            //     return await initializeOllamaModel(modelName);
 
             case LLMType.OPENAI:
                 return new ChatOpenAI({
@@ -66,7 +66,7 @@ async function initializeOllamaModel(modelName) {
             }
 
             vscode.window.showInformationMessage(`Model "${modelName}" successfully downloaded.`);
-        } 
+        }
 
         return new ChatOllama({
             baseUrl: "http://localhost:11434",

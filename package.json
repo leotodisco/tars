@@ -19,6 +19,14 @@
   "contributes": {
     "commands": [
       {
+        "command": "tars.toggle-decorations",
+        "title": "Toggle Decorations"
+      },
+      {
+        "command": "tars.help-command",
+        "title": "Tars Help"
+      },
+      {
         "command": "tars.show-tars-config",
         "title": "Show Tars Config"
       },
@@ -68,6 +76,7 @@
     "@langchain/ollama": "^0.2.0",
     "@langchain/openai": "^0.4.4",
     "dotenv": "^16.4.7",
+    "ioredis": "^5.6.1",
     "tslab": "^1.0.22"
   }
 }

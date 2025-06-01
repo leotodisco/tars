@@ -1,31 +1,46 @@
-const PLANNING_SYSTEM_PROMPT = `You are given a piece of code and the User's mental state (in form of user preferences).
+const PLANNING_SYSTEM_PROMPT = 
+`You are given:
+
+- A **code snippet**, typically a function/method/class
+- A set of **user preferences** (representing the user's mental state and expectations)
 
 Your task is to:
-1. Analyze the code.
-2. Split it into multiple **clusters**, where each cluster represents a **group of lines** that are very related (e.g., function body, if block, else, else-if, except, try, loop, single-line statement with a completely distinct purpose).
- Each cluster must represent a meaningful, self-contained unit of logic.
-3. For each cluster, return a dictionary with the following structure:
 
-{{
-    "text": "cluster code snippet as-is, preserving the original formatting and indentation",
-    "description": "a natural language explanation of what this cluster does written following the user mental state"
-}}
+1. Split the code into multiple clusters, where:
+   - Each cluster must be a logically cohesive block, meaning it represents a self-contained unit of purpose or behavior.
+   - A helpful rule of thumb is to consider the entire body of each control structure—like an if block, a for loop, or a try/except—as one cluster, because these structures usually encapsulate a single, self-contained logical operation.
+     For example:
+       - the entire body of an if, else, or elif block
+       - the entire body of a for or while loop
+       - the entire body of a try, except, or finally block
+   - Do NOT create single-line clusters unless absolutely necessary (e.g., an isolated return or assert statement with no adjacent logic).
+   - Prefer grouping consecutive simple lines together into a single cluster when they belong to the same logical flow.
+   - The number of clusters can also depend on the user's preferences:
+     - For less experienced users, or when detailed explanations are requested, it is better to divide the code into **more fine-grained clusters** to improve clarity and focus.
+     - For experienced users or when minimal explanations are requested, prefer **larger clusters** that represent broader logical units.
+   - Clusters must preserve the original code order and indentation exactly.
 
-- **If in the input code there is something that is not important/complex and the user claimed that he wants some minimal explanation, please respond only with "None" as value for the "description" field**
+2. For each cluster identified, return a **dictionary** with:
+   - "text": the **exact code** in that cluster (DO NOT change spaces or indentation)
+   - "description": an explanation that:
+     - **Respects the user’s preferences**
+     - Is detailed or minimal based on the user's style
+     - Always addresses the **purpose and logic** of the cluster
 
-Output a **list of these dictionaries**, preserving the original order of the code.
-When writing the description you must **ALWAYS** consider the user mental state
-**NEVER CHANGE THE NUMBER OF SPACES or Indentation because I will use a parser.**
+Important constraints:
+- DO NOT change the indentation or spacing in the "text" field — this will break downstream parsing
+- DO NOT explain line by line unless the user explicitly requests it in their preferences
+- DO NOT describe simple, self-evident lines such as:
+  - Constant assignments (e.g. x = 5)
+  - Basic return statements (e.g. return result)
+  - Obvious initializations (e.g. count = 0)
+  - Simple list/dictionary creation without logic
+- When a line is trivial or meaningless to explain alone, simply write:
+  - "description": "No exp"
+- Describe **why the logic exists** and **what each block is doing**, not how each syntax element works unless the user is using you to learn a new language.
+The concatenation of all clusters must exactly reconstruct the original input code, with no additions, omissions, or changes in formatting (including whitespace and indentation).
 
-**Important rules**:
-- **Always consider the User's mental state** when writing the description (e.g., experience level, learning goal, tone preference).
-- **NEVER** change the number of spaces or indentation in the "text" field. The formatting must remain exactly as in the original code.
-- The output **must contain multiple clusters** — do not return a single block of code.
-- Maintain the **original code sequence**; do not reorder the clusters.
-- IMPORTANT: Do **not** provide line by line explanation, unless the user preferences claim so.
-- Do **not** include any introductory or explanatory text.
-- Do **not** wrap the output in \`\`\`json or any other formatting — return raw JSON only.
-- Do **not** add extra indent or spaces to the text key in the result.
+The output must be readable, purposeful, and adapted to the mental model and expectations of the user.
 `;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:
