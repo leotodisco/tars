@@ -5,6 +5,7 @@ const agentState = Annotation.Root({
     inputCode: Annotation(),
     userProfile: Annotation(),
     importedConstructs: Annotation(),
+    documentationContext: Annotation(),
     outputString: Annotation(),
     outputStructure: Annotation(),
     syntaxCheckMessage: Annotation(),

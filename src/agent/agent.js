@@ -29,7 +29,8 @@ async function planner(state) {
     }).withStructuredOutput(schema, {
         strict: true,
     });
-
+    
+    // from all the imports, extract only the ones actually used in the code we are analyzing
     const importedConstructsCode = extractUsedConstructs(state["inputCode"], state["importedConstructs"])
     logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN
