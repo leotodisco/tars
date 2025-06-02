@@ -111,7 +111,7 @@ async function explainCodeCommand(context) {
 			outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 			storeExplanation(construct.sourceCode, outputList);
 		}
-		
+
 
 		// show decorations in editor
 		for (const element of outputList) {

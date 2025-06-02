@@ -19,6 +19,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "tars.flushDB",
+        "title": "Flush DB"
+      },
+      {
         "command": "tars.retrieve",
         "title": "Index Retrieve"
       },
@@ -96,5 +100,4 @@
     "pdf-parse": "^1.1.1",
     "tslab": "^1.0.22"
   }
-
 }

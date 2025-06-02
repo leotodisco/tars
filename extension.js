@@ -5,7 +5,8 @@ const { configureTars, showConfig, flushConfiguration } = require("./src/command
 const { helpCommand } = require("./src/commands/helpCommand.js")
 const { toggleDecorations } = require("./src/commands/toggleDecorationsCommand.js")
 const { indexProjectCommand } = require("./src/commands/indexProjectDocumentsCommand.js")
-const { retrieve } = require("./src/vectorDB/chromaRetriever.js")
+const { retrieve } = require("./src/vectorDB/vectorRetriever.js")
+const {flushDB} = require("./src/vectorDB/vectorStore.js");
 
 /**
  * @param {vscode.ExtensionContext} context
@@ -29,6 +30,7 @@ function activate(context) {
 		{ name: 'tars.toggle-decorations', callback: () => toggleDecorations(context) },
 		{ name: 'tars.index-project', callback: () => indexProjectCommand(context) },
 		{ name: 'tars.retrieve', callback: () => retrieve("crea_area_assistenza") },
+		{ name: 'tars.flushDB', callback: () => flushDB() },
 	];
 
 	commands.forEach(({ name, callback }) => {
