@@ -2,8 +2,9 @@
   "name": "tars",
   "publisher": "leopoldo",
   "displayName": "TARS",
-  "description": "",
-  "version": "0.0.1",
+  "description": "TARS is an intelligent AI agent designed to assist with code understanding.",
+  "icon": "media/tars-logo-full.png",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.97.0"
   },
