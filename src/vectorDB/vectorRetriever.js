@@ -10,6 +10,7 @@ async function retrieve(query = "crea_area_assistenza") {
 
     console.log("@@@ DEBUG")
     for (const doc of documents) {
+        vscode.window.showInformationMessage(`* ${doc.pageContent}\n\n\n`)
         console.log(`* ${doc.pageContent}\n\n\n`);
     }
 

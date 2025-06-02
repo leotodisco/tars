@@ -10,3 +10,9 @@ vsc-extension-quickstart.md
 **/.vscode-test.*
 *.png
 *.env
+
+src/**
+node_modules/**
+esbuild.js
+.vscode/**
+test/**
