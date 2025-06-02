@@ -16,30 +16,33 @@ let vectorStore = new MemoryVectorStore(embeddings);
 //
 
 let retriever = vectorStore.asRetriever({
-    k: 2
+  k: 2
 })
 
+
+
 async function addDocuments(documents) {
-    await vectorStore.addDocuments(documents);
-    console.log("Documents added to DB")
+  await vectorStore.addDocuments(documents);
+  console.log("Documents added to DB")
 }
 
 async function retrieveDocuments(query) {
-    const similaritySearchResults = await retriever.invoke(query);
-    return similaritySearchResults;
+  const similaritySearchResults = await vectorStore.similaritySearchVectorWithScore(await embeddings.embedQuery(query), 3)
+  //const similaritySearchResults = await retriever.invoke(query);
+  return similaritySearchResults;
 }
 
 function flushDB() {
   if (vectorStore && Array.isArray(vectorStore.memoryVectors)) {
     vectorStore.memoryVectors.length = 0;
-    console.log("✅ MemoryVectorStore cleared.");
+    console.log("MemoryVectorStore cleared.");
   } else {
-    console.warn("⚠️ No valid MemoryVectorStore found.");
+    console.warn("No valid MemoryVectorStore found.");
   }
 }
 
 module.exports = {
-    addDocuments,
-    retrieveDocuments,
-    flushDB
+  addDocuments,
+  retrieveDocuments,
+  flushDB
 }

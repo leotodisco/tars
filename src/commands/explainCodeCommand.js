@@ -65,7 +65,7 @@ async function explainCodeCommand(context) {
 	let targets;
 
 	// consider only the highlighted code if any
-	// otherwise consider the entire file 
+	// otherwise consider the entire file/constructs found
 	if (hasSelection) {
 		targets = [{
 			name: document.getText(selection),
@@ -92,7 +92,7 @@ async function explainCodeCommand(context) {
 	for (const construct of targets) {
 		// qui stampa il construct name
 		const documentation = await retrieve(construct.name)
-		const contentString = documentation.map(doc => doc.pageContent).join('\n\n\n');
+		const contentString = documentation.map(doc => doc[0].pageContent).join('\n\n\n');
 		console.log(`\n\n documentation = ${contentString}`)
 		const cached = getCachedExplanation(construct.sourceCode);
 		let outputList;

@@ -11,7 +11,7 @@ async function indexProjectCommand(context) {
     // const collectionName = path.basename(rootPath); keep this line for Chroma DB migration
 
     const directoryLoader = new DirectoryLoader(rootPath, {
-        ".pdf": (filePath) => new PDFLoader(filePath),
+        ".pdf": (filePath) => new PDFLoader(filePath, { parsedItemSeparator: "" }),
     });
 
     const directoryDocs = await directoryLoader.load();
@@ -21,12 +21,25 @@ async function indexProjectCommand(context) {
     }
 
     const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 200,
-        chunkOverlap: 40,
+        chunkSize: 512,
+        chunkOverlap: 200,
+        separators: ["\n\n", "\n", " ", ""],
     });
 
-    const splitDocs = await textSplitter.splitDocuments(directoryDocs);
-    await addDocuments(splitDocs);
+    const splitDocs = await textSplitter.splitDocuments(directoryDocs, { appendChunkOverlapHeader: true });
+    // const filteredDocs = splitDocs.filter(doc => doc.pageContent.trim().length > 0);
+const cleanedDocs = splitDocs
+  .map(doc => {
+    const cleaned = doc.pageContent.replace(/\s+/g, ' ').trim();
+    return { ...doc, pageContent: cleaned };
+  })
+  .filter(doc => doc.pageContent.length > 0);
+    try {
+        await addDocuments(cleanedDocs);
+    } catch (error) {
+        vscode.window.showErrorMessage(error)
+        console.log(error)
+    }
     vscode.window.showInformationMessage("Project Completely Indexed")
     return;
 }
