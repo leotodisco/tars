@@ -12,7 +12,7 @@
     "Other"
   ],
   "activationEvents": [],
-  "main": "./extension.js",
+  "main": "./dist/extension.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/leotodisco/tars"

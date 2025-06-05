@@ -108,8 +108,7 @@ async function planner(state) {
         vscode.window.showErrorMessage(`Error during Agent execution: ${error} `);
         throw new Error(error.message);
     }
-    console.log("####")
-    console.log("Type:", typeof response);
+
     let responseString = response
     const list = response.results ?? [];
 
@@ -127,7 +126,6 @@ async function planner(state) {
     if (!responseString) {
         return { inputCode: state["inputCode"] };
     }
-    console.log(`RESPONSE STRING = ${responseString}`)
     return {
         inputCode: state["inputCode"],
         outputString: newResponseString,
