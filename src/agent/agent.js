@@ -30,11 +30,12 @@ async function planner(state) {
         strict: true,
     });
 
+    // from all the imports, extract only the ones actually used in the code we are analyzing
     const importedConstructsCode = extractUsedConstructs(state["inputCode"], state["importedConstructs"])
     logger.warn("agent", state["inputCode"])
     // CASO BASE: PRIMA RUN
     if (state["syntaxCheckMessage"] === undefined) {
-        const userInput = `
+        let userInput = `
             ## User mental state: 
             ${state["userProfile"]}
 
@@ -43,6 +44,13 @@ async function planner(state) {
 
             ## Source code That you will describe: 
             ${doubleBraces(state["inputCode"])}`;
+
+        console.log(`DOCUMENTAZIONE = ${state["documentationContext"]}`)
+        if (state["documentationContext"]) {
+            userInput += `
+            ## Documentation Context: 
+            ${doubleBraces(state["documentationContext"])}`;
+        }
 
         var prompt = ChatPromptTemplate.fromMessages([
             [
@@ -100,8 +108,7 @@ async function planner(state) {
         vscode.window.showErrorMessage(`Error during Agent execution: ${error} `);
         throw new Error(error.message);
     }
-    console.log("####")
-    console.log("Type:", typeof response);
+
     let responseString = response
     const list = response.results ?? [];
 
@@ -119,7 +126,6 @@ async function planner(state) {
     if (!responseString) {
         return { inputCode: state["inputCode"] };
     }
-    console.log(`RESPONSE STRING = ${responseString}`)
     return {
         inputCode: state["inputCode"],
         outputString: newResponseString,

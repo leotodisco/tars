@@ -2,8 +2,9 @@
   "name": "tars",
   "publisher": "leopoldo",
   "displayName": "TARS",
-  "description": "",
-  "version": "0.0.1",
+  "description": "TARS is an intelligent AI agent designed to assist with code understanding.",
+  "icon": "media/tars-logo-full.png",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -11,13 +12,25 @@
     "Other"
   ],
   "activationEvents": [],
-  "main": "./extension.js",
+  "main": "./dist/extension.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/leotodisco/tars"
   },
   "contributes": {
     "commands": [
+      {
+        "command": "tars.flushDB",
+        "title": "Flush DB"
+      },
+      {
+        "command": "tars.retrieve",
+        "title": "Index Retrieve"
+      },
+      {
+        "command": "tars.index-project",
+        "title": "Index Project"
+      },
       {
         "command": "tars.toggle-decorations",
         "title": "Toggle Decorations"
@@ -56,7 +69,15 @@
       }
     ]
   },
+  "overrides": {
+    "onnxruntime-node": "^1.22.0"
+  },
   "scripts": {
+        "compile": "node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "vscode:prepublish": "npm run package",
+    "package": "node esbuild.js --production",
     "lint": "eslint .",
     "pretest": "npm run lint",
     "test": "vscode-test"
@@ -67,16 +88,23 @@
     "@types/vscode": "^1.97.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "@xenova/transformers": "^2.17.2",
+    "esbuild": "^0.25.5",
     "eslint": "^9.19.0"
   },
   "dependencies": {
-    "@huggingface/inference": "^3.4.1",
-    "@langchain/core": "^0.3.44",
+    "@huggingface/inference": "^2.8.1",
+    "@huggingface/transformers": "^3.5.2",
+    "@langchain/community": "^0.3.45",
+    "@langchain/core": "^0.3.57",
     "@langchain/langgraph": "^0.2.51",
     "@langchain/ollama": "^0.2.0",
-    "@langchain/openai": "^0.4.4",
+    "@langchain/openai": "^0.4.9",
+    "chromadb": "^2.4.6",
     "dotenv": "^16.4.7",
     "ioredis": "^5.6.1",
+    "langchain": "^0.3.27",
+    "pdf-parse": "^1.1.1",
     "tslab": "^1.0.22"
   }
 }

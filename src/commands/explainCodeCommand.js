@@ -4,7 +4,6 @@ const { agent } = require("../agent/agent");
 const fs = require('fs'); // Use this to print image later
 const { findConstructs, extractImportedConstructs } = require("../utils/constructsRetriever")
 const { getCachedExplanation, storeExplanation } = require("../utils/cache.js")
-const { findMatches } = require("../utils/stringUtils")
 const {
 	normalizeOutputStructure,
 	decorateExplanation,
@@ -13,6 +12,8 @@ const {
 const { runTomQuiz } = require("./tomCommand.js")
 const { configureTars } = require("./configureTarsCommand.js")
 const { toggleDecorations } = require("./toggleDecorationsCommand.js")
+const { retrieve } = require("../vectorDB/vectorRetriever")
+const path = require("path")
 
 /**
  * Analyzes the active code editor and generates contextual explanations for 
@@ -64,11 +65,12 @@ async function explainCodeCommand(context) {
 	let targets;
 
 	// consider only the highlighted code if any
-	// otherwise consider the entire file 
+	// otherwise consider the entire file/constructs found
 	if (hasSelection) {
 		targets = [{
+			name: document.getText(selection),
 			sourceCode: document.getText(selection),
-			range: selection
+			range: selection,
 		}];
 	} else {
 		const isConstructBased = constructs.some(c =>
@@ -88,6 +90,10 @@ async function explainCodeCommand(context) {
 	vscode.window.showInformationMessage("Starting Agent...")
 	let elementIndex = 0;
 	for (const construct of targets) {
+		// qui stampa il construct name
+		const documentation = await retrieve(construct.name)
+		const contentString = documentation.map(doc => doc[0].pageContent).join('\n\n\n');
+		console.log(`\n\n documentation = ${contentString}`)
 		const cached = getCachedExplanation(construct.sourceCode);
 		let outputList;
 		if (cached) {
@@ -103,7 +109,8 @@ async function explainCodeCommand(context) {
 					maxAttempts: 3,
 					userProfile: userMindString,
 					llmAPI: llmAPI,
-					importedConstructs: importedConstructs
+					importedConstructs: importedConstructs,
+					documentationContext: contentString
 				});
 			} catch (error) {
 				console.error("Error during agent invocation:", error);
@@ -111,7 +118,7 @@ async function explainCodeCommand(context) {
 			outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
 			storeExplanation(construct.sourceCode, outputList);
 		}
-		
+
 
 		// show decorations in editor
 		for (const element of outputList) {
