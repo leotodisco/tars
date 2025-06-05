@@ -89,65 +89,74 @@ function distributeExplanationAcrossLines(explanation, numberOfLines) {
  * @param {string} matchText - The code snippet text to locate in the document.
  */
 function decorateExplanation(editor, document, element, elementIndex, matchText) {
-    const startIndex = findLooseMatchIndex(document.getText(), matchText);
+    const matchIndices = findLooseMatchIndex(document.getText(), matchText);
 
-    if (startIndex === -1) {
+    if (matchIndices.length === 0) {
         console.warn("⚠️ Match not found for matchText:");
         console.warn(matchText);
         return [];
     }
 
-    const endIndex = startIndex + matchText.length;
-    const startPosition = document.positionAt(startIndex);
-    const endPosition = document.positionAt(endIndex);
-    const range = new vscode.Range(startPosition, endPosition);
-    const startLine = range.start.line;
-    const endLine = range.end.line;
     const explanation = element["description"];
-    let explanationLines = distributeExplanationAcrossLines(explanation, endLine - startLine + 1);
+    const allDecorations = [];
 
-    // Pad with empty lines if the explanation is shorter than the code block
-    while (explanationLines.length < endLine - startLine + 1) {
-        explanationLines.push(" ");
+    for (const startIndex of matchIndices) {
+        //if the line has already been decorated skip the iteration
+        if (decoratedIndexes.includes(startIndex)) {
+            continue;
+        }
+        const endIndex = startIndex + matchText.length;
+        const startPosition = document.positionAt(startIndex);
+        const endPosition = document.positionAt(endIndex);
+        const range = new vscode.Range(startPosition, endPosition);
+        const startLine = range.start.line;
+        const endLine = range.end.line;
+
+        let explanationLines = distributeExplanationAcrossLines(explanation, endLine - startLine + 1);
+
+        // Pad with empty lines if the explanation is shorter than the code block
+        while (explanationLines.length < endLine - startLine + 1) {
+            explanationLines.push(" ");
+        }
+
+        // Calculate the max line length in the code block
+        const maxLineLength = Math.max(
+            ...Array.from({ length: endLine - startLine + 1 }, (_, i) =>
+                document.lineAt(startLine + i).text.length
+            )
+        );
+
+        const borderColor = elementIndex % 2 === 0
+            ? "rgb(255, 255, 112)"     // Yellow
+            : "rgba(128, 0, 255, 1)";  // Purple
+
+        const decorations = explanationLines
+            .slice(0, endLine - startLine + 1)
+            .map((text, i) => {
+                const line = startLine + i;
+                const actualLineLength = document.lineAt(line).text.length;
+
+                // Add padding so all explanations start at the same column
+                const paddingSize = maxLineLength - actualLineLength + 1;
+                const padding = '\u00A0'.repeat(paddingSize);
+                const paddedText = padding + text;
+
+                const type = createDecorationType(paddedText, borderColor);
+
+                const lineRange = new vscode.Range(
+                    new vscode.Position(line, actualLineLength),
+                    new vscode.Position(line, actualLineLength)
+                );
+
+                editor.setDecorations(type, [lineRange]);
+                return { type, range: lineRange };
+            });
+
+        allDecorations.push(...decorations);
+        decoratedIndexes.push(startIndex)
     }
 
-    // Calculate the max line length in the code block
-    const maxLineLength = Math.max(
-        ...Array.from({ length: endLine - startLine + 1 }, (_, i) =>
-            document.lineAt(startLine + i).text.length
-        )
-    );
-
-    const borderColor = elementIndex % 2 === 0
-        ? "rgb(255, 255, 112)"     // Yellow
-        : "rgba(128, 0, 255, 1)";  // Purple
-
-    const decorations = explanationLines
-        .slice(0, endLine - startLine + 1)
-        .map((text, i) => {
-            const line = startLine + i;
-            const actualLineLength = document.lineAt(line).text.length;
-
-            // Add padding so all explanations start at the same column
-            const paddingSize = maxLineLength - actualLineLength + 1; // +1 for spacing
-            const padding = '\u00A0'.repeat(paddingSize); // non-breaking spaces
-            const paddedText = padding + text;
-
-            const type = createDecorationType(paddedText, borderColor);
-
-            const lineRange = new vscode.Range(
-                new vscode.Position(line, actualLineLength),
-                new vscode.Position(line, actualLineLength)
-            );
-
-            return { type, range: lineRange };
-        });
-
-    decorations.forEach(({ type, range }) => {
-        editor.setDecorations(type, [range]);
-    });
-
-    return decorations;
+    return allDecorations;
 }
 
 function normalizeChar(c) {
@@ -171,30 +180,38 @@ function compressWhitespace(str) {
 function findLooseMatchIndex(documentText, matchText) {
     const target = compressWhitespace(matchText);
     const normalizedDoc = compressWhitespace(documentText);
+    const indices = [];
 
-    // Trova indice semantico nel testo normalizzato
-    const semanticIndex = normalizedDoc.indexOf(target);
-    if (semanticIndex === -1) return -1;
+    let searchStart = 0;
 
-    // Ora, trova la vera posizione nell'originale che corrisponde a semanticIndex
-    let docIndex = 0;
-    let normIndex = 0;
+    while (searchStart < normalizedDoc.length) {
+        const semanticIndex = normalizedDoc.indexOf(target, searchStart);
+        if (semanticIndex === -1) break;
 
-    while (docIndex < documentText.length && normIndex < semanticIndex) {
-        const normChar = normalizeChar(documentText[docIndex]);
-        if (normChar === ' ') {
-            // Salta gruppo di whitespace
-            while (docIndex < documentText.length && normalizeChar(documentText[docIndex]) === ' ') {
+        // Trova la posizione originale nel documentText corrispondente a semanticIndex
+        let docIndex = 0;
+        let normIndex = 0;
+
+        while (docIndex < documentText.length && normIndex < semanticIndex) {
+            const normChar = normalizeChar(documentText[docIndex]);
+            if (normChar === ' ') {
+                while (docIndex < documentText.length && normalizeChar(documentText[docIndex]) === ' ') {
+                    docIndex++;
+                }
+                normIndex++;
+            } else {
                 docIndex++;
+                normIndex++;
             }
-            normIndex++;
-        } else {
-            docIndex++;
-            normIndex++;
         }
+
+        indices.push(docIndex);
+
+        // Sposta la ricerca più avanti per trovare il prossimo match
+        searchStart = semanticIndex + target.length;
     }
 
-    return docIndex;
+    return indices;
 }
 
 let extensionState = {
@@ -202,10 +219,13 @@ let extensionState = {
     decorationsVisible: true
 };
 
+let decoratedIndexes = []
+
 module.exports = {
     normalizeOutputStructure,
     getMaxLineLength,
     createDecorationType,
     decorateExplanation,
-    extensionState
+    extensionState,
+    decoratedIndexes
 };
