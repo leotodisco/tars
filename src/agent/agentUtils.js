@@ -13,7 +13,7 @@ Your task is to:
        - the entire body of an if, else, or elif block
        - the entire body of a for or while loop
        - the entire body of a try, except, or finally block
-   - Do NOT create single-line clusters unless absolutely necessary (e.g., an isolated return or assert statement with no adjacent logic).
+   - DO NOT create single-line clusters unless absolutely necessary (e.g., an isolated return or assert statement with no adjacent logic).
    - Prefer grouping consecutive simple lines together into a single cluster when they belong to the same logical flow.
    - The number of clusters can also depend on the user's preferences:
      - For less experienced users, or when detailed explanations are requested, it is better to divide the code into **more fine-grained clusters** to improve clarity and focus.
@@ -38,9 +38,12 @@ Important constraints:
 - When a line is trivial or meaningless to explain alone, simply write:
   - "description": "No exp"
 - Describe **why the logic exists** and **what each block is doing**, not how each syntax element works unless the user is using you to learn a new language.
-The concatenation of all clusters must exactly reconstruct the original input code, with no additions, omissions, or changes in formatting (including whitespace and indentation).
+- The concatenation of all clusters must exactly reconstruct the original input code, with no additions, omissions, or changes in formatting (including whitespace and indentation).
 
-The output must be readable, purposeful, and adapted to the mental model and expectations of the user.
+Examples of adaptation based on user preferences:
+- If the user is a **beginner** and wants to understand how the code works, split the code into **more fine-grained clusters** and provide **more detailed descriptions**, even explaining the use of control structures like \`for\` loops or \`try/except\` blocks.
+  - *Example*: For a \`for\` loop, describe what is being iterated, what the loop’s goal is, and why that structure is used.
+- If the user is **experienced** and prefers high-level insights, use **larger clusters** and provide **concise descriptions** that focus only on the overall purpose and logic of each block, avoiding syntax-level commentary.
 `;
 
 const CRITIQUE_SYSTEM_PROMPT = `You are provided with the following structure:

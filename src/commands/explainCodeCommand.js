@@ -94,7 +94,7 @@ async function explainCodeCommand(context) {
 		const documentation = await retrieve(construct.name)
 		const contentString = documentation.map(doc => doc[0].pageContent).join('\n\n\n');
 		console.log(`\n\n documentation = ${contentString}`)
-		const cached = getCachedExplanation(construct.sourceCode);
+		const cached = getCachedExplanation(construct.sourceCode + userMindString);
 		let outputList;
 		if (cached) {
 			outputList = normalizeOutputStructure(cached);
@@ -116,7 +116,7 @@ async function explainCodeCommand(context) {
 				console.error("Error during agent invocation:", error);
 			}
 			outputList = normalizeOutputStructure(agentResponse["outputStructure"]);
-			storeExplanation(construct.sourceCode, outputList);
+			storeExplanation(construct.sourceCode + userMindString, outputList);
 		}
 
 

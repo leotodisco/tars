@@ -65,22 +65,7 @@ async function planner(state) {
 
         state["currentAttemptNumber"] = 0;
     }
-    // CASO IN CUI IL JSON PRECEDENTEMENTE GENERATO HA ERRORI SINTATTICI
-    else if (state["syntaxCheckMessage"] !== "OK") {
-        logger.warn("agent", "syntax error found.")
-        var prompt = ChatPromptTemplate.fromMessages([
-            [
-                "system",
-                PLANNING_SYSTEM_PROMPT
-            ],
-            [
-                "user",
-                doubleBraces("DO NOT ADD ```json in the response. This is the source code: " + state["inputCode"] + " Correct the JSON you generated before as its structure is not correct: " + state["outputString"])
-            ],
-        ]);
 
-        state["currentAttemptNumber"] = state["currentAttemptNumber"] + 1;
-    }
     // CASO IN CUI ABBIAMO UNA CRITICA
     else if (state["critique"] !== "OK") {
         logger.warn("agent", "critique found.")
