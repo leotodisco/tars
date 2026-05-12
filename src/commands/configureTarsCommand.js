@@ -65,9 +65,9 @@ function viewPanel(webview, context) {
         </style>
     </head>
     <body>
-        <h2>Configurazione Modello LLM</h2>
+        <h2>LLM Configuration</h2>
 
-        <label for="llmName">Nome del modello</label>
+        <label for="llmName">Model name</label>
         <input type="text" id="llmName" placeholder="es. GPT-4, Mistral 7B">
 
         <label for="llmType">Tipo di utilizzo</label>
@@ -81,7 +81,7 @@ function viewPanel(webview, context) {
             <input type="password" id="apiKey" placeholder="sk-...">
         </div>
 
-        <button onclick="submitConfig()">Salva configurazione</button>
+        <button onclick="submitConfig()">Save configuration</button>
 
         <script>
             const vscode = acquireVsCodeApi();
