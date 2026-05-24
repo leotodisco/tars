@@ -23,14 +23,18 @@ function runTomQuiz(context) {
 
 	panel.webview.html = getQuizHtml(panel.webview, context);
 
-	// Listener per ricevere i dati dalla WebView
 	panel.webview.onDidReceiveMessage(
 		async (message) => {
-			if (message.type === "quizResponse") {
-				await saveAnswer(
-					context,
-					message.value.answer,
-					message.value.question
+
+			if (message.type === "saveConfig") {
+				const answers = message.value;
+
+				for (const [question, answer] of Object.entries(answers)) {
+					await saveAnswer(context, answer, question);
+				}
+
+				vscode.window.showInformationMessage(
+					"Configuration saved successfully!"
 				);
 			}
 		},
@@ -84,6 +88,14 @@ function getQuizHtml(webview, context) {
 				.selected {
 					background-color: #007acc !important;
 				}
+
+				.save-btn {
+					margin-top: 30px;
+					padding: 12px 18px;
+					background-color: #007acc;
+					border-radius: 8px;
+					font-weight: bold;
+				}
 			</style>
 		</head>
 
@@ -91,65 +103,71 @@ function getQuizHtml(webview, context) {
 
 			<h2>What is your programming experience level?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'Beginner', 'What is your programming experience level?')">Beginner</button>
-				<button onclick="sendAnswer(this, 'Intermediate', 'What is your programming experience level?')">Intermediate</button>
-				<button onclick="sendAnswer(this, 'Expert', 'What is your programming experience level?')">Expert</button>
-				<button onclick="sendAnswer(this, 'Mentor/Professional', 'What is your programming experience level?')">Mentor/Professional</button>
+				<button onclick="selectAnswer(this, 'What is your programming experience level?', 'Beginner')">Beginner</button>
+				<button onclick="selectAnswer(this, 'What is your programming experience level?', 'Intermediate')">Intermediate</button>
+				<button onclick="selectAnswer(this, 'What is your programming experience level?', 'Expert')">Expert</button>
+				<button onclick="selectAnswer(this, 'What is your programming experience level?', 'Mentor/Professional')">Mentor/Professional</button>
 			</div>
 
 			<h2>What is your current role?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'Student', 'What is your current role?')">Student</button>
-				<button onclick="sendAnswer(this, 'Junior Developer', 'What is your current role?')">Junior Developer</button>
-				<button onclick="sendAnswer(this, 'Senior Developer', 'What is your current role?')">Senior Developer</button>
-				<button onclick="sendAnswer(this, 'Researcher', 'What is your current role?')">Researcher</button>
+				<button onclick="selectAnswer(this, 'What is your current role?', 'Student')">Student</button>
+				<button onclick="selectAnswer(this, 'What is your current role?', 'Junior Developer')">Junior Developer</button>
+				<button onclick="selectAnswer(this, 'What is your current role?', 'Senior Developer')">Senior Developer</button>
+				<button onclick="selectAnswer(this, 'What is your current role?', 'Researcher')">Researcher</button>
 			</div>
 
 			<h2>Why are you using this extension?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'To learn a language', 'Why are you using this extension?')">To learn a language</button>
-				<button onclick="sendAnswer(this, 'To boost productivity', 'Why are you using this extension?')">To boost productivity</button>
-				<button onclick="sendAnswer(this, 'To prepare for an exam or interview', 'Why are you using this extension?')">To prepare for an exam or interview</button>
-				<button onclick="sendAnswer(this, 'To write cleaner code', 'Why are you using this extension?')">To write cleaner code</button>
+				<button onclick="selectAnswer(this, 'Why are you using this extension?', 'To learn a language')">To learn a language</button>
+				<button onclick="selectAnswer(this, 'Why are you using this extension?', 'To boost productivity')">To boost productivity</button>
+				<button onclick="selectAnswer(this, 'Why are you using this extension?', 'To prepare for an exam or interview')">To prepare for an exam or interview</button>
+				<button onclick="selectAnswer(this, 'Why are you using this extension?', 'To write cleaner code')">To write cleaner code</button>
 			</div>
 
 			<h2>How do you prefer to receive explanations?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'Short and direct', 'How do you prefer to receive explanations?')">Short and direct</button>
-				<button onclick="sendAnswer(this, 'Detailed and technical', 'How do you prefer to receive explanations?')">Detailed and technical</button>
+				<button onclick="selectAnswer(this, 'How do you prefer to receive explanations?', 'Short and direct')">Short and direct</button>
+				<button onclick="selectAnswer(this, 'How do you prefer to receive explanations?', 'Detailed and technical')">Detailed and technical</button>
 			</div>
 
 			<h2>Which languages do you mainly use?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'JavaScript', 'Which languages do you mainly use?')">JavaScript</button>
-				<button onclick="sendAnswer(this, 'Python', 'Which languages do you mainly use?')">Python</button>
-				<button onclick="sendAnswer(this, 'TypeScript', 'Which languages do you mainly use?')">TypeScript</button>
-				<button onclick="sendAnswer(this, 'C++', 'Which languages do you mainly use?')">C++</button>
-				<button onclick="sendAnswer(this, 'Java', 'Which languages do you mainly use?')">Java</button>
-				<button onclick="sendAnswer(this, 'Other', 'Which languages do you mainly use?')">Other</button>
+				<button onclick="selectAnswer(this, 'Which languages do you mainly use?', 'JavaScript')">JavaScript</button>
+				<button onclick="selectAnswer(this, 'Which languages do you mainly use?', 'Python')">Python</button>
+				<button onclick="selectAnswer(this, 'Which languages do you mainly use?', 'TypeScript')">TypeScript</button>
+				<button onclick="selectAnswer(this, 'Which languages do you mainly use?', 'C++')">C++</button>
+				<button onclick="selectAnswer(this, 'Which languages do you mainly use?', 'Java')">Java</button>
+				<button onclick="selectAnswer(this, 'Which languages do you mainly use?', 'Other')">Other</button>
 			</div>
 
 			<h2>What is your main goal with this extension?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'Learning new things', 'What is your main goal with this extension?')">Learning new things</button>
-				<button onclick="sendAnswer(this, 'Saving time', 'What is your main goal with this extension?')">Saving time</button>
-				<button onclick="sendAnswer(this, 'Better understanding my code', 'What is your main goal with this extension?')">Better understanding my code</button>
-				<button onclick="sendAnswer(this, 'Getting real-time development help', 'What is your main goal with this extension?')">Getting real-time development help</button>
+				<button onclick="selectAnswer(this, 'What is your main goal with this extension?', 'Learning new things')">Learning new things</button>
+				<button onclick="selectAnswer(this, 'What is your main goal with this extension?', 'Saving time')">Saving time</button>
+				<button onclick="selectAnswer(this, 'What is your main goal with this extension?', 'Better understanding my code')">Better understanding my code</button>
+				<button onclick="selectAnswer(this, 'What is your main goal with this extension?', 'Getting real-time development help')">Getting real-time development help</button>
 			</div>
 
 			<h2>What tone do you prefer from the assistant?</h2>
 			<div class="button-group">
-				<button onclick="sendAnswer(this, 'Friendly', 'What tone do you prefer from the assistant?')">Friendly</button>
-				<button onclick="sendAnswer(this, 'Professional', 'What tone do you prefer from the assistant?')">Professional</button>
-				<button onclick="sendAnswer(this, 'Neutral', 'What tone do you prefer from the assistant?')">Neutral</button>
+				<button onclick="selectAnswer(this, 'What tone do you prefer from the assistant?', 'Friendly')">Friendly</button>
+				<button onclick="selectAnswer(this, 'What tone do you prefer from the assistant?', 'Professional')">Professional</button>
+				<button onclick="selectAnswer(this, 'What tone do you prefer from the assistant?', 'Neutral')">Neutral</button>
+			</div>
+
+			<div>
+				<button class="save-btn" onclick="saveConfig()">
+					Save configuration
+				</button>
 			</div>
 
 			<script>
 				const vscode = acquireVsCodeApi();
+				const answers = {};
 
-				function sendAnswer(button, answer, question) {
+				function selectAnswer(button, question, answer) {
 
-					// reset visual selection
 					const parent = button.parentElement;
 
 					Array.from(parent.children).forEach(btn => {
@@ -158,12 +176,13 @@ function getQuizHtml(webview, context) {
 
 					button.classList.add("selected");
 
+					answers[question] = answer;
+				}
+
+				function saveConfig() {
 					vscode.postMessage({
-						type: "quizResponse",
-						value: {
-							question,
-							answer
-						}
+						type: "saveConfig",
+						value: answers
 					});
 				}
 			</script>
@@ -175,24 +194,11 @@ function getQuizHtml(webview, context) {
 
 // Funzione per salvare la risposta dell'utente nel globalState
 async function saveAnswer(context, answer, question) {
+  let savedAnswers = context.globalState.get("userMind") || {};
 
-	let savedAnswers =
-		context.globalState.get("userMind") || [];
+  savedAnswers[question] = answer;
 
-	// rimuove eventuale risposta precedente
-	savedAnswers = savedAnswers.filter(
-		item => item.question !== question
-	);
-
-	savedAnswers.push({
-		question,
-		answer
-	});
-
-	await context.globalState.update(
-		"userMind",
-		savedAnswers
-	);
+  await context.globalState.update("userMind", savedAnswers);
 }
 
 /**
@@ -200,14 +206,14 @@ async function saveAnswer(context, answer, question) {
  * @param {vscode.ExtensionContext} context
  */
 function getSavedAnswers(context) {
-	return context.globalState.get("userMind") || [];
+  return context.globalState.get("userMind") || {};
 }
 
 /**
  * @param {vscode.ExtensionContext} context
  */
 function flushUserMind(context) {
-	context.globalState.update("userMind", null);
+  context.globalState.update("userMind", {});
 }
 
 /**
@@ -215,31 +221,24 @@ function flushUserMind(context) {
  */
 function showUserMentalState(context) {
 
-	let userMind =
-		context.globalState.get('userMind');
+  let userMind = context.globalState.get('userMind');
 
-	if (!userMind || userMind.length === 0) {
+  if (!userMind || Object.keys(userMind).length === 0) {
+    vscode.window.showInformationMessage("No user profile found.");
+    return;
+  }
 
-		vscode.window.showInformationMessage(
-			"No user profile found."
-		);
+  const userMindString = [
+    `- Programming experience: ${userMind["What is your programming experience level?"] || "N/A"}`,
+    `- Role: ${userMind["What is your current role?"] || "N/A"}`,
+    `- Using extension for: ${userMind["Why are you using this extension?"] || "N/A"}`,
+    `- Preferred explanation style: ${userMind["How do you prefer to receive explanations?"] || "N/A"}`,
+    `- Main language: ${userMind["Which languages do you mainly use?"] || "N/A"}`,
+    `- Main goal: ${userMind["What is your main goal with this extension?"] || "N/A"}`,
+    `- Preferred tone: ${userMind["What tone do you prefer from the assistant?"] || "N/A"}`
+  ].join("\n");
 
-		return;
-	}
-
-	const userMindString = [
-		`- Programming experience: ${userMind[0]?.answer || "N/A"}`,
-		`- Role: ${userMind[1]?.answer || "N/A"}`,
-		`- Using extension for: ${userMind[2]?.answer || "N/A"}`,
-		`- Preferred explanation style: ${userMind[3]?.answer || "N/A"}`,
-		`- Main language: ${userMind[4]?.answer || "N/A"}`,
-		`- Main goal: ${userMind[5]?.answer || "N/A"}`,
-		`- Preferred tone: ${userMind[6]?.answer || "N/A"}`
-	].join("\n");
-
-	vscode.window.showInformationMessage(
-		userMindString
-	);
+  vscode.window.showInformationMessage(userMindString);
 }
 
 module.exports = {

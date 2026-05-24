@@ -19,9 +19,10 @@ function configureTars(context) {
             if (message.type === "modelConfig") {
                 const answers = message.value.answers;
 
-                // convert array → object (robusto)
+                // ✅ convert array → stable object schema
                 const config = {
-                    llm: answers.find(x => x.question === "LLM")?.answer || null,
+                    llmName: answers.find(x => x.question === "LLM")?.answer || null,
+                    llmType: "openai",
                     apiKey: answers.find(x => x.question === "OpenAI API Key")?.answer || null
                 };
 
@@ -181,9 +182,11 @@ function showConfig(context) {
     }
 
     const configString = [
-        `- LLM: ${config.llm ?? "not set"}`,
+        `- LLM: ${config.llmName ?? "not set"}`,
+        `- Type: ${config.llmType ?? "not set"}`,
         `- OpenAI API: ${config.apiKey ? "******" : "not set"}`
     ].join("\n");
+
     console.log(configString);
 }
 

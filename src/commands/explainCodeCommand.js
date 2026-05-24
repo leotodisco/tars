@@ -1,7 +1,6 @@
 const { LLMType } = require("../agent/agentState.js")
 const vscode = require('vscode');
 const { agent } = require("../agent/agent");
-const fs = require('fs'); // Use this to print image later
 const { findConstructs, extractImportedConstructs } = require("../utils/constructsRetriever")
 const { getCachedExplanation, storeExplanation } = require("../utils/cache.js")
 const {
@@ -37,10 +36,10 @@ async function explainCodeCommand(context) {
 		await configureTars(context);
 		config = context.globalState.get('tarsConfiguration');
 	}
-
-	const llmName = config[0]["answer"]
-	const llmType = config[1]["answer"]
-	const llmAPI = config[2]["answer"]
+	
+	const llmName = config.llmName;
+	const llmType = config.llmType;
+	const llmAPI = config.apiKey;
 
 	// Retrieve user profile (Theory Of Mind stuff)
 	let userMind = context.globalState.get('userMind');
@@ -49,15 +48,15 @@ async function explainCodeCommand(context) {
 		userMind = context.globalState.get('userMind');
 	}
 	// builds the user mental state string
-	const userMindString = [
-		`- programming experience: ${userMind[0]["answer"]}`,
-		`- role: ${userMind[1]["answer"]}`,
-		`- The user is using this LLM: ${userMind[2]["answer"]}`,
-		`- The user wants the explanation that are: ${userMind[3]["answer"]}`,
-		`- The user is very confident in: ${userMind[4]["answer"]}`,
-		`- The goal of the user is to: ${userMind[5]["answer"]}`,
-		`- Use the following tone: ${userMind[6]["answer"]}`
-	].join("\n");
+	const userMindString = `User profile:
+		- experience: ${userMind["What is your programming experience level?"] || "N/A"}
+		- role: ${userMind["What is your current role?"] || "N/A"}
+		- purpose: ${userMind["Why are you using this extension?"] || "N/A"}
+		- explanation style: ${userMind["How do you prefer to receive explanations?"] || "N/A"}
+		- languages: ${userMind["Which languages do you mainly use?"] || "N/A"}
+		- goal: ${userMind["What is your main goal with this extension?"] || "N/A"}
+		- tone: ${userMind["What tone do you prefer from the assistant?"] || "N/A"}
+		`.trim();
 
 	const selection = editor.selection;
 	const hasSelection = selection && !selection.isEmpty;
