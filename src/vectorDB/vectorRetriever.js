@@ -9,12 +9,6 @@ async function retrieve(query) {
     try {
         const documents = await retrieveDocuments(query);
 
-        console.log("@@@ DEBUG")
-        for (const doc of documents) {
-            console.log(`* ${doc[0].pageContent}; SCORE = ${doc[1]} \n\n\n`);
-            vscode.window.showInformationMessage(`* ${doc[0].pageContent}; SCORE = ${doc[1]} \n\n\n`);
-        }
-
         return documents;
     } catch (error) {
         console.error("Failed to retrieve documents:", error);
