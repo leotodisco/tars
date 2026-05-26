@@ -2,7 +2,7 @@
 
 **TARS** is a Visual Studio Code extension that provides real-time, developer-personalized explanations of your code, powered by **LLM Agents** built with [LangGraph](https://www.langgraph.dev/).
 
-It integrates cutting-edge concepts like **Self-Refinement**, **Theory of Mind**, and **Perspective Taking**, allowing you to receive **accurate, personalized, and visually contextualized explanations** — either locally for full privacy or via API-powered cloud models.
+It integrates cutting-edge concepts like **Self-Refinement**, **Theory of Mind**, and **Perspective Taking**, allowing you to receive **accurate, personalized, and visually contextualized explanations** — via API-powered cloud models.
 
 ---
 
@@ -20,16 +20,11 @@ It integrates cutting-edge concepts like **Self-Refinement**, **Theory of Mind**
 - 🖼️ **Visual Inline Explanations**  
   Explanations appear next to the code as editor decorations, making them intuitive and non-intrusive.
 
-- 🔐 **Local or Cloud Execution**  
-  Choose privacy or performance: run locally with [Ollama](https://ollama.ai), or use OpenAI / DeepSeek for broader LLM access.
-
 ---
 
 ## 🤖 Supported LLM Providers
 
-1. **Ollama** (local — fully private)
-2. **OpenAI** (via API key)
-3. **DeepSeek** (via API key)
+1. **OpenAI** (via API key)
 
 ---
 
@@ -55,12 +50,10 @@ Open the **Command Palette** (`F1`, `Ctrl+Shift+P`, or `Cmd+Shift+P`) and run th
 
 You will be prompted to provide the following information:
 
-1. **Select the backend**: Choose whether you want to use the **OpenAI API** or run a **local model** via **Ollama**.
-2. **Model configuration**: Enter the **model name** (e.g., `gpt-4`, `deepseek-coder`, `llama2`, etc.).
-3. **API Key (if using OpenAI)**: Provide your **OpenAI API key** when prompted.
+1. **Model configuration**: Choose the model the **model name** in the dropdown menu.
+2. **API Key**: Provide your **OpenAI API key** when prompted.
 
 > 💡 You can rerun `Configure Tars` at any time to change these settings.
-For **Ollama**, make sure the local server is running.
 
 ---
 
