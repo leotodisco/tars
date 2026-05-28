@@ -99,6 +99,17 @@ Then, using **Perspective Taking**, the LLM adjusts its explanations as if it we
 
 ---
 
+### Additional Resources
+
+The repository also includes a `/misc` folder containing additional material related to the project:
+
+- `survey/`  
+  Contains the survey questions and the collected answers used during the evaluation phase.
+
+- `.vsix` file  
+  The executable package of the VS Code extension, which can be installed directly in Visual Studio Code.
+
+---
 
 ## 📄 License
 
