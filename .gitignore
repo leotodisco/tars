@@ -1,6 +1,6 @@
 node_modules
 .vscode-test/
-*.vsix
+
 *.env
 *.DS_Store
 *.pdf

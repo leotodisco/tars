@@ -22,13 +22,18 @@ It integrates cutting-edge concepts like **Self-Refinement**, **Theory of Mind**
 
 ---
 
-## 🤖 Supported LLM Providers
-
-1. **OpenAI** (via API key)
-
----
 
 ## 🚀 Getting Started
+
+### 0. Preliminary Requirements
+
+Please ensure you are using a version of Visual Studio Code that is compatible with the extension.
+
+- **Minimum supported VS Code version:** `1.97.0`
+- Using an older version may cause compatibility issues or prevent the extension from working correctly.
+
+It is recommended to keep VS Code updated to the latest stable release for the best experience and full feature support.
+
 
 ### 1. Install the Extension
 
